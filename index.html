@@ -78,6 +78,10 @@
   .opt.wrong{border-color:var(--red); background:#fdf1f0;}
   .opt.wrong .marker{background:var(--red); border-color:var(--red); color:#fff;}
   .opt.locked{cursor:default;}
+  .opt .opt-num{margin-left:auto; align-self:center; flex:0 0 auto;
+    font-size:11.5px; font-weight:600; color:var(--muted);
+    border:1px solid var(--border); background:#fff; border-radius:4px; padding:1px 5px; line-height:1.4;}
+  .opt.selected .opt-num{color:var(--accent); border-color:var(--accent);}
   .result{margin-top:16px; padding:13px 15px; border-radius:6px; font-size:14.5px; line-height:1.55; display:none;}
   .result.show{display:block;}
   .result.ok{background:#f0f7f2; border:1px solid var(--green);}
@@ -162,6 +166,25 @@
     .ctrl-nav{position:static; order:2;}
     .ctrl-nav-grid{grid-template-columns:repeat(8,1fr); max-height:32vh;}
   }
+  /* непонятные вопросы */
+  .marks-pill{display:inline-block; min-width:22px; padding:1px 7px; margin-left:6px; border-radius:10px;
+    background:var(--accent); color:#fff; font-size:12px; font-weight:700; vertical-align:middle;}
+  .marks-pill.zero{background:var(--border); color:var(--muted);}
+  .mark-row{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:14px;}
+  .mark-row .mark-hint{font-size:12.5px; color:var(--muted);}
+  .btn-mark{padding:7px 12px; font-size:13px; font-weight:600; font-family:inherit; cursor:pointer;
+    background:var(--panel2); color:var(--text); border:1px solid var(--border); border-radius:6px;
+    transition:background .12s, border-color .12s, color .12s;}
+  .btn-mark:hover{background:#ebedf1; border-color:#c2cad6;}
+  .btn-mark:disabled{opacity:.5; cursor:not-allowed;}
+  .btn-mark.active-bad{background:#fdf1f0; border-color:var(--red); color:var(--red);}
+  .btn-mark.active-ok{background:#f0f7f2; border-color:var(--green); color:var(--green);}
+  .mark-item{border:1px solid var(--border); border-radius:8px; padding:11px 13px; margin-bottom:10px; background:var(--panel2);}
+  .mark-item-head{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:6px;}
+  .mark-item-text{font-size:14px; line-height:1.5;}
+  .mark-del{border:1px solid var(--border); background:#fff; color:var(--muted); border-radius:6px;
+    width:26px; height:26px; font-size:15px; line-height:1; cursor:pointer; font-family:inherit; flex:0 0 auto;}
+  .mark-del:hover{border-color:var(--red); color:var(--red);}
 </style>
 </head>
 <body>
@@ -183,6 +206,11 @@
         <div class="sec-title">Подготовка к контрольной работе</div>
         <div class="sec-desc">229 вопросов по четырём лекциям: наука БЖД, классификация негативных факторов, микроклимат, вредные вещества и пыль. Навигатор по вопросам, проверка ответов и разбор ошибок.</div>
         <div class="sec-arrow">Перейти →</div>
+      </button>
+      <button class="section-card" id="goMarks">
+        <div class="sec-title">Непонятные вопросы <span class="marks-pill zero" id="homeMarksCount">0</span></div>
+        <div class="sec-desc" id="homeMarksDesc">Отмечайте вопросы кнопкой «Непонятен» во время теста — они соберутся здесь, и их можно пройти заново.</div>
+        <div class="sec-arrow">Открыть →</div>
       </button>
     </div>
   </div>
@@ -263,6 +291,11 @@
             <input type="text" id="ctrlAnswer" class="answer-input" autocomplete="off" placeholder="Впишите ответ" aria-label="Ответ на вопрос">
           </div>
           <div class="result" id="ctrlResult"></div>
+          <div class="mark-row">
+            <span class="mark-hint" id="ctrlMarkHint">Отметить вопрос:</span>
+            <button class="btn-mark" id="ctrlMarkBad" type="button">✗ Непонятен</button>
+            <button class="btn-mark" id="ctrlMarkOk" type="button">✓ Понятен</button>
+          </div>
           <div class="flex-row" style="margin-top:16px; flex-wrap:wrap;">
             <button class="btn-ghost" id="ctrlCheck">Проверить</button>
             <button class="btn-ghost hidden" id="ctrlNext">Следующий вопрос</button>
@@ -290,6 +323,22 @@
         <div class="score-sub" id="ctrlFinalSub"></div>
         <div id="ctrlReview" style="margin-top:14px;"></div>
         <button class="btn-ghost" style="width:100%;" id="ctrlRestart">Пройти ещё раз</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ЭКРАН: НЕПОНЯТНЫЕ ВОПРОСЫ -->
+  <div id="marksScreen" class="hidden">
+    <div class="menu-nav">
+      <button class="btn-back" id="backHome3">← На главную</button>
+    </div>
+    <div class="card">
+      <h2>Непонятные вопросы</h2>
+      <p class="ctrl-lead">Вопросы, которые вы отметили кнопкой «Непонятен». Можно пройти их отдельным тестом или убрать из списка.</p>
+      <div id="marksList"></div>
+      <div class="flex-row" style="margin-top:16px;">
+        <button class="btn-primary" id="marksStart" style="margin-top:0; width:auto; flex:1 1 200px;">Пройти их</button>
+        <button class="btn-ghost" id="marksClear">Очистить список</button>
       </div>
     </div>
   </div>
@@ -753,9 +802,15 @@ function renderOptions(q){
   q.opts.forEach((opt,i)=>{
     const d=document.createElement('div');
     d.className='opt '+mask;
-    d.innerHTML=`<div class="marker"></div><div class="otext">${opt}</div>`;
+    d.innerHTML=`<div class="marker"></div><div class="otext">${opt}</div><span class="opt-num">${i+1}</span>`;
     d.dataset.i=i;
-    d.addEventListener('click',()=>{ if(answered) return; d.classList.toggle('selected'); });
+    d.addEventListener('click',()=>{
+      if(answered) return;
+      if(q.multi){ d.classList.toggle('selected'); return; }
+      const was=d.classList.contains('selected');
+      optionsEl.querySelectorAll('.opt').forEach(o=>o.classList.remove('selected'));
+      if(!was) d.classList.add('selected');
+    });
     optionsEl.appendChild(d);
   });
 }
@@ -834,6 +889,7 @@ checkBtn.addEventListener('click',()=>{
   checkBtn.disabled=true;
   checkBtn.classList.add('hidden');
   nextBtn.classList.remove('hidden');
+  nextBtn.focus();
 });
 
 nextBtn.addEventListener('click',()=>{
@@ -902,16 +958,20 @@ function showHome(){
   controlScreen.classList.add('hidden');
   quizScreen.classList.add('hidden');
   endScreen.classList.add('hidden');
+  marksScreen.classList.add('hidden');
+  marksRender();
 }
 function showStart(){
   startScreen.classList.remove('hidden');
   homeScreen.classList.add('hidden');
   controlScreen.classList.add('hidden');
+  marksScreen.classList.add('hidden');
 }
 function showControl(){
   controlScreen.classList.remove('hidden');
   homeScreen.classList.add('hidden');
   startScreen.classList.add('hidden');
+  marksScreen.classList.add('hidden');
   ctrlReset();
 }
 
@@ -1082,12 +1142,13 @@ function ctrlStartTest(){
 
 function ctrlRenderOptions(q){
   ctrlOptionsEl.innerHTML='';
-  q.o.forEach(function(o){
+  q.o.forEach(function(o,i){
     const d=document.createElement('div');
     d.className='opt';
     const mk=document.createElement('div'); mk.className='marker';
     const tx=document.createElement('div'); tx.className='otext'; tx.textContent=o.t;
-    d.appendChild(mk); d.appendChild(tx);
+    const num=document.createElement('span'); num.className='opt-num'; num.textContent=String(i+1);
+    d.appendChild(mk); d.appendChild(tx); d.appendChild(num);
     d.dataset.letter=o.l;
     d.addEventListener('click',function(){
       if(ctrlAnswered) return;
@@ -1151,6 +1212,7 @@ function ctrlShowQuestion(i){
     ctrlAnswerWrapEl.classList.remove('hidden');
     ctrlOptionsEl.innerHTML='';
     ctrlAnswerEl.focus();
+    if(ctrlAnswerEl.scrollIntoView) ctrlAnswerEl.scrollIntoView({block:'center'});
   }
   if(st){
     ctrlRestoreAnswer(q, st);
@@ -1160,6 +1222,7 @@ function ctrlShowQuestion(i){
     ctrlNextBtn.classList.add('hidden');
     ctrlNextBtn.textContent=(i===ctrlTest.length-1) ? 'Завершить' : 'Следующий вопрос';
   }
+  ctrlMarkButtons();
   ctrlUpdateNav();
 }
 
@@ -1208,6 +1271,7 @@ function ctrlCheckAnswer(){
   ctrlCheckBtn.classList.add('hidden');
   ctrlNextBtn.classList.remove('hidden');
   ctrlNextBtn.textContent=(ctrlIdx===ctrlTest.length-1) ? 'Завершить' : 'Следующий вопрос';
+  ctrlNextBtn.focus();
   ctrlUpdateNav();
 }
 
@@ -1278,8 +1342,196 @@ ctrlAnswerEl.addEventListener('keydown',function(e){
   }
 });
 ctrlQuizEl.addEventListener('keydown',function(e){
-  if(e.key==='Enter' && ctrlAnswered){ e.preventDefault(); ctrlNext(); }
+  if(e.key==='Enter' && ctrlAnswered && e.target.tagName!=='BUTTON' && e.target.id!=='ctrlAnswer'){ e.preventDefault(); ctrlNext(); }
 });
+
+document.addEventListener('keydown',function(e){
+  if(e.ctrlKey || e.altKey || e.metaKey) return;
+  const t=e.target;
+  if(t && (t.tagName==='BUTTON' || t.tagName==='TEXTAREA' || t.tagName==='INPUT' || t.id==='ctrlAnswer')) return;
+
+  // выбор варианта цифрой 1–9
+  const num=parseInt(e.key,10);
+  if(num>=1 && num<=9){
+    if(!ctrlQuizEl.classList.contains('hidden') && !ctrlAnswered){
+      const opts=ctrlOptionsEl.children;
+      if(opts[num-1]){ e.preventDefault(); opts[num-1].click(); }
+      return;
+    }
+    if(!quizScreen.classList.contains('hidden') && !answered){
+      const opts=optionsEl.querySelectorAll('.opt');
+      if(opts[num-1]){ e.preventDefault(); opts[num-1].click(); }
+      return;
+    }
+    return;
+  }
+
+  if(e.key!=='Enter') return;
+
+  // контрольная: Enter проверяет выбранный вариант или листает дальше
+  if(!ctrlQuizEl.classList.contains('hidden')){
+    if(ctrlAnswered){ e.preventDefault(); ctrlNext(); }
+    else if(ctrlTest[ctrlIdx] && ctrlTest[ctrlIdx].t==='mc'){ e.preventDefault(); ctrlCheckAnswer(); }
+    return;
+  }
+  // практика
+  if(!quizScreen.classList.contains('hidden')){
+    if(answered){ e.preventDefault(); nextBtn.click(); }
+    else if(optionsEl.querySelector('.opt.selected')){ e.preventDefault(); checkBtn.click(); }
+  }
+});
+
+/* ================= НЕПОНЯТНЫЕ ВОПРОСЫ ================= */
+const MARKS_KEY='bzhd_unknown_questions_v1';
+const marksScreen=document.getElementById('marksScreen');
+const marksListEl=document.getElementById('marksList');
+const marksStartBtn=document.getElementById('marksStart');
+const marksClearBtn=document.getElementById('marksClear');
+const homeMarksCountEl=document.getElementById('homeMarksCount');
+const homeMarksDescEl=document.getElementById('homeMarksDesc');
+const ctrlMarkBadBtn=document.getElementById('ctrlMarkBad');
+const ctrlMarkOkBtn=document.getElementById('ctrlMarkOk');
+const ctrlMarkHintEl=document.getElementById('ctrlMarkHint');
+
+let marks=[];
+try{
+  const saved=JSON.parse(localStorage.getItem(MARKS_KEY)||'[]');
+  if(Array.isArray(saved)) marks=saved.filter(function(x){ return typeof x==='string'; });
+}catch(e){ marks=[]; }
+
+function marksSave(){
+  try{ localStorage.setItem(MARKS_KEY,JSON.stringify(marks)); }catch(e){}
+}
+function marksHas(text){ return marks.indexOf(text)>=0; }
+function marksAdd(text){
+  if(marksHas(text)) return false;
+  marks.push(text); marksSave(); return true;
+}
+function marksRemove(text){
+  const i=marks.indexOf(text);
+  if(i<0) return false;
+  marks.splice(i,1); marksSave(); return true;
+}
+function marksQuestions(){
+  return CONTROL_QUESTIONS.filter(function(q){ return marksHas(q.q); });
+}
+
+function marksRender(){
+  const qs=marksQuestions();
+  homeMarksCountEl.textContent=qs.length;
+  homeMarksCountEl.className='marks-pill'+(qs.length?'':' zero');
+  homeMarksDescEl.textContent=qs.length
+    ? 'В списке '+qs.length+' '+ctrlWord(qs.length,'вопрос','вопроса','вопросов')+'. Можно пройти их заново отдельным тестом.'
+    : 'Отмечайте вопросы кнопкой «Непонятен» во время теста — они соберутся здесь, и их можно пройти заново.';
+  if(!qs.length){
+    marksListEl.innerHTML='<div class="notice">Список пуст. <b>Открывайте тест</b> и отмечайте вопросы, которые нужно повторить, кнопкой «Непонятен».</div>';
+  }else{
+    let html='';
+    qs.forEach(function(q,i){
+      const m=ctrlMeta(q);
+      html+='<div class="mark-item">';
+      html+='<div class="mark-item-head">';
+      html+='<span class="badge '+m.cls+'">'+ctrlEsc(m.title)+'</span>';
+      html+='<button class="mark-del" type="button" data-idx="'+i+'" aria-label="Убрать вопрос из списка">×</button>';
+      html+='</div>';
+      html+='<div class="mark-item-text">'+ctrlEsc(q.q)+'</div>';
+      html+='</div>';
+    });
+    marksListEl.innerHTML=html;
+    Array.prototype.forEach.call(marksListEl.querySelectorAll('.mark-del'),function(b){
+      b.addEventListener('click',function(){
+        const q=qs[+b.dataset.idx];
+        if(q){ marksRemove(q.q); marksRender(); ctrlMarkButtons(); }
+      });
+    });
+  }
+  marksStartBtn.disabled=qs.length===0;
+}
+
+function ctrlWord(n,one,few,many){
+  const n10=n%10, n100=n%100;
+  if(n10===1 && n100!==11) return one;
+  if(n10>=2 && n10<=4 && (n100<10 || n100>=20)) return few;
+  return many;
+}
+
+function ctrlMarkButtons(){
+  const q=ctrlTest[ctrlIdx];
+  const marked=q ? marksHas(q.q) : false;
+  ctrlMarkBadBtn.classList.toggle('active-bad',marked);
+  ctrlMarkOkBtn.classList.toggle('active-ok',!!q && !marked);
+  ctrlMarkBadBtn.disabled=!q;
+  ctrlMarkOkBtn.disabled=!q;
+}
+
+let ctrlMarkTimer=null;
+function ctrlMarkFlash(text){
+  ctrlMarkHintEl.textContent=text;
+  ctrlMarkHintEl.style.color='var(--accent)';
+  clearTimeout(ctrlMarkTimer);
+  ctrlMarkTimer=setTimeout(function(){
+    ctrlMarkHintEl.textContent='Отметить вопрос:';
+    ctrlMarkHintEl.style.color='';
+  },2200);
+}
+
+ctrlMarkBadBtn.addEventListener('click',function(){
+  const q=ctrlTest[ctrlIdx]; if(!q) return;
+  marksAdd(q.q); marksRender(); ctrlMarkButtons();
+  ctrlMarkFlash('Добавлено в непонятные');
+});
+ctrlMarkOkBtn.addEventListener('click',function(){
+  const q=ctrlTest[ctrlIdx]; if(!q) return;
+  marksRemove(q.q); marksRender(); ctrlMarkButtons();
+  ctrlMarkFlash('Убрано из списка');
+});
+
+function ctrlStartList(list){
+  if(!list || !list.length) return;
+  ctrlTest=list.slice();
+  ctrlState=new Array(ctrlTest.length).fill(null);
+  ctrlIdx=0;
+  ctrlIntroEl.classList.add('hidden');
+  ctrlEndEl.classList.add('hidden');
+  ctrlQuizEl.classList.remove('hidden');
+  marksScreen.classList.add('hidden');
+  homeScreen.classList.add('hidden');
+  startScreen.classList.add('hidden');
+  quizScreen.classList.add('hidden');
+  endScreen.classList.add('hidden');
+  controlScreen.classList.remove('hidden');
+  ctrlBuildNav();
+  ctrlShowQuestion(0);
+  if(ctrlQcardEl.scrollIntoView) ctrlQcardEl.scrollIntoView({block:'start'});
+}
+
+document.getElementById('goMarks').addEventListener('click',function(){
+  marksRender();
+  marksScreen.classList.remove('hidden');
+  homeScreen.classList.add('hidden');
+  startScreen.classList.add('hidden');
+  controlScreen.classList.add('hidden');
+  quizScreen.classList.add('hidden');
+  endScreen.classList.add('hidden');
+});
+document.getElementById('backHome3').addEventListener('click',showHome);
+marksStartBtn.addEventListener('click',function(){
+  const qs=marksQuestions();
+  if(!qs.length) return;
+  ctrlStartList(qs);
+});
+marksClearBtn.addEventListener('click',function(){
+  if(!marks.length) return;
+  if(!confirm('Очистить список непонятных вопросов?')) return;
+  marks=[]; marksSave(); marksRender(); ctrlMarkButtons();
+});
+
+/* убрать из списка вопросы, которых больше нет в базе */
+(function(){
+  marks=marks.filter(function(t){ return CONTROL_QUESTIONS.some(function(q){ return q.q===t; }); });
+  marksSave();
+  marksRender();
+})();
 
 (function(){
   const first=ctrlPartsEl.querySelector('button[data-part="1"]');
