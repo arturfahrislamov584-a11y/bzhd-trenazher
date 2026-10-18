@@ -181,6 +181,8 @@
   .btn-mark.active-ok{background:#f0f7f2; border-color:var(--green); color:var(--green);}
   .mark-item{border:1px solid var(--border); border-radius:8px; padding:11px 13px; margin-bottom:10px; background:var(--panel2);}
   .mark-item-head{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:6px;}
+  .mark-item-head .badge{margin-right:auto;}
+  .mark-cb{width:17px; height:17px; flex:0 0 auto; accent-color:var(--accent); cursor:pointer;}
   .mark-item-text{font-size:14px; line-height:1.5;}
   .mark-del{border:1px solid var(--border); background:#fff; color:var(--muted); border-radius:6px;
     width:26px; height:26px; font-size:15px; line-height:1; cursor:pointer; font-family:inherit; flex:0 0 auto;}
@@ -338,6 +340,7 @@
       <div id="marksList"></div>
       <div class="flex-row" style="margin-top:16px;">
         <button class="btn-primary" id="marksStart" style="margin-top:0; width:auto; flex:1 1 200px;">Пройти их</button>
+        <button class="btn-ghost" id="marksDeleteSel" disabled>Удалить отмеченные</button>
         <button class="btn-ghost" id="marksClear">Очистить список</button>
       </div>
     </div>
@@ -1387,6 +1390,7 @@ const marksScreen=document.getElementById('marksScreen');
 const marksListEl=document.getElementById('marksList');
 const marksStartBtn=document.getElementById('marksStart');
 const marksClearBtn=document.getElementById('marksClear');
+const marksDeleteSelBtn=document.getElementById('marksDeleteSel');
 const homeMarksCountEl=document.getElementById('homeMarksCount');
 const homeMarksDescEl=document.getElementById('homeMarksDesc');
 const ctrlMarkBadBtn=document.getElementById('ctrlMarkBad');
@@ -1394,6 +1398,7 @@ const ctrlMarkOkBtn=document.getElementById('ctrlMarkOk');
 const ctrlMarkHintEl=document.getElementById('ctrlMarkHint');
 
 let marks=[];
+let marksSelected=[];
 try{
   const saved=JSON.parse(localStorage.getItem(MARKS_KEY)||'[]');
   if(Array.isArray(saved)) marks=saved.filter(function(x){ return typeof x==='string'; });
@@ -1418,6 +1423,8 @@ function marksQuestions(){
 
 function marksRender(){
   const qs=marksQuestions();
+  /* выбранные галочками вопросы, которых уже нет в списке, не держим */
+  marksSelected=marksSelected.filter(function(t){ return qs.some(function(q){ return q.q===t; }); });
   homeMarksCountEl.textContent=qs.length;
   homeMarksCountEl.className='marks-pill'+(qs.length?'':' zero');
   homeMarksDescEl.textContent=qs.length
@@ -1429,8 +1436,10 @@ function marksRender(){
     let html='';
     qs.forEach(function(q,i){
       const m=ctrlMeta(q);
+      const checked=marksSelected.indexOf(q.q)>=0;
       html+='<div class="mark-item">';
       html+='<div class="mark-item-head">';
+      html+='<input type="checkbox" class="mark-cb" data-idx="'+i+'"'+(checked?' checked':'')+' aria-label="Выбрать вопрос">';
       html+='<span class="badge '+m.cls+'">'+ctrlEsc(m.title)+'</span>';
       html+='<button class="mark-del" type="button" data-idx="'+i+'" aria-label="Убрать вопрос из списка">×</button>';
       html+='</div>';
@@ -1438,14 +1447,36 @@ function marksRender(){
       html+='</div>';
     });
     marksListEl.innerHTML=html;
+    Array.prototype.forEach.call(marksListEl.querySelectorAll('.mark-cb'),function(cb){
+      cb.addEventListener('change',function(){
+        const q=qs[+cb.dataset.idx];
+        if(!q) return;
+        if(cb.checked){
+          if(marksSelected.indexOf(q.q)<0) marksSelected.push(q.q);
+        }else{
+          marksSelected=marksSelected.filter(function(t){ return t!==q.q; });
+        }
+        marksSelUpdate();
+      });
+    });
     Array.prototype.forEach.call(marksListEl.querySelectorAll('.mark-del'),function(b){
       b.addEventListener('click',function(){
         const q=qs[+b.dataset.idx];
-        if(q){ marksRemove(q.q); marksRender(); ctrlMarkButtons(); }
+        if(q){
+          marksSelected=marksSelected.filter(function(t){ return t!==q.q; });
+          marksRemove(q.q); marksRender(); ctrlMarkButtons();
+        }
       });
     });
   }
   marksStartBtn.disabled=qs.length===0;
+  marksSelUpdate();
+}
+
+function marksSelUpdate(){
+  const n=marksSelected.length;
+  marksDeleteSelBtn.disabled=n===0;
+  marksDeleteSelBtn.textContent=n ? 'Удалить отмеченные ('+n+')' : 'Удалить отмеченные';
 }
 
 function ctrlWord(n,one,few,many){
@@ -1523,7 +1554,13 @@ marksStartBtn.addEventListener('click',function(){
 marksClearBtn.addEventListener('click',function(){
   if(!marks.length) return;
   if(!confirm('Очистить список непонятных вопросов?')) return;
-  marks=[]; marksSave(); marksRender(); ctrlMarkButtons();
+  marks=[]; marksSelected=[]; marksSave(); marksRender(); ctrlMarkButtons();
+});
+marksDeleteSelBtn.addEventListener('click',function(){
+  if(!marksSelected.length) return;
+  marksSelected.slice().forEach(function(t){ marksRemove(t); });
+  marksSelected=[];
+  marksRender(); ctrlMarkButtons();
 });
 
 /* убрать из списка вопросы, которых больше нет в базе */
