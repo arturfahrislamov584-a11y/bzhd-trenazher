@@ -1,0 +1,1292 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Подготовка к тесту БЖД</title>
+<style>
+  :root{
+    --bg:#ffffff; --panel:#ffffff; --panel2:#f5f6f8; --text:#1a2230; --muted:#5b6473;
+    --accent:#1f5fae; --green:#1a7f37; --red:#b42318; --amber:#9a6700;
+    --border:#d8dde5; --radius:8px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    font-family:'Segoe UI', system-ui, -apple-system, Roboto, Arial, sans-serif;
+    background:var(--bg); color:var(--text); min-height:100vh; line-height:1.5;
+    font-size:15px;
+  }
+  .wrap{max-width:720px; margin:0 auto; padding:28px 20px 64px;}
+  header{padding:8px 0 22px; border-bottom:2px solid var(--text); margin-bottom:24px;}
+  header h1{font-size:22px; font-weight:700; letter-spacing:.2px;}
+  header p{color:var(--muted); font-size:13.5px; margin-top:3px;}
+  .card{
+    background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);
+    padding:20px 22px; margin-bottom:16px;
+  }
+  .card h2{font-size:16px; font-weight:600; margin-bottom:14px; color:var(--text);
+    letter-spacing:.2px; text-transform:uppercase; font-size:13px; color:var(--muted);}
+  /* стартовый экран */
+  .counts{display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 4px;}
+  .counts button{
+    flex:1 1 80px; padding:10px 8px; font-size:14px; font-weight:600;
+    background:var(--panel2); color:var(--text); border:1px solid var(--border);
+    border-radius:6px; cursor:pointer; transition:background .12s, border-color .12s;
+    font-family:inherit;
+  }
+  .counts button:hover{background:#ebedf1; border-color:#c2cad6;}
+  .counts button.selected{background:var(--accent); color:#fff; border-color:var(--accent);}
+  .themes label{display:flex; align-items:flex-start; gap:10px; cursor:pointer; padding:7px 8px; border-radius:6px; font-size:14px;}
+  .themes label:hover{background:var(--panel2);}
+  .themes input{accent-color:var(--accent); width:16px; height:16px; margin-top:2px;}
+  .btn-primary{
+    display:block; width:100%; padding:12px; font-size:15px; font-weight:600;
+    background:var(--accent); color:#fff; border-radius:6px; cursor:pointer;
+    border:none; margin-top:18px; transition:background .12s; font-family:inherit;
+  }
+  .btn-primary:hover{background:#174d8c;}
+  .btn-primary:disabled{opacity:.5; cursor:not-allowed;}
+  .btn-ghost{
+    padding:9px 16px; font-size:14px; font-weight:600; background:var(--panel2);
+    color:var(--text); border:1px solid var(--border); border-radius:6px; cursor:pointer;
+    transition:background .12s, border-color .12s; font-family:inherit;
+  }
+  .btn-ghost:hover{background:#ebedf1; border-color:#c2cad6;}
+  .flex-row{display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap;}
+  /* вопроc */
+  .qmeta{display:flex; justify-content:space-between; align-items:center; color:var(--muted);
+    font-size:12.5px; margin-bottom:14px; border-bottom:1px solid var(--border); padding-bottom:10px;}
+  .qtext{font-size:16.5px; line-height:1.55; margin-bottom:18px; font-weight:600;}
+  .badge{display:inline-block; padding:2px 9px; border-radius:4px; font-size:11.5px; font-weight:600; letter-spacing:.2px;}
+  .badge.theme1{background:#e7effb; color:#1f5fae; border:1px solid #c9dcf5;}
+  .badge.theme2{background:#ecf5ef; color:#17563e; border:1px solid #cde6d7;}
+  .badge.theme3{background:#f7f1e3; color:#8a6d1f; border:1px solid #ecdcb0;}
+  .opt{
+    display:flex; gap:12px; align-items:flex-start; padding:12px 13px; border:1px solid var(--border);
+    border-radius:6px; margin-bottom:9px; cursor:pointer; transition:border-color .12s, background .12s;
+    background:var(--panel2); font-size:14.5px;
+  }
+  .opt:hover{border-color:#c2cad6; background:#ebedf1;}
+  .opt .marker{min-width:22px; height:22px; border:1.5px solid var(--muted); border-radius:50%; margin-top:1px;
+    display:flex; align-items:center; justify-content:center; font-size:12px; color:transparent; flex:0 0 auto;}
+  .opt.multi .marker{border-radius:4px;}
+  .opt.selected{border-color:var(--accent); background:#eef4fb;}
+  .opt.selected .marker{background:var(--accent); color:#fff; border-color:var(--accent);}
+  .opt.correct{border-color:var(--green); background:#f0f7f2;}
+  .opt.correct .marker{background:var(--green); border-color:var(--green); color:#fff;}
+  .opt.wrong{border-color:var(--red); background:#fdf1f0;}
+  .opt.wrong .marker{background:var(--red); border-color:var(--red); color:#fff;}
+  .opt.locked{cursor:default;}
+  .result{margin-top:16px; padding:13px 15px; border-radius:6px; font-size:14.5px; line-height:1.55; display:none;}
+  .result.show{display:block;}
+  .result.ok{background:#f0f7f2; border:1px solid var(--green);}
+  .result.bad{background:#fdf1f0; border:1px solid var(--red);}
+  .result .lbl{font-weight:700; font-size:15px; margin-bottom:4px;}
+  .result.ok .lbl{color:var(--green);}
+  .result.bad .lbl{color:var(--red);}
+  .theory{margin-top:14px; padding:13px 15px; border-radius:6px; background:#f7f9fb;
+    border:1px solid var(--border); border-left:3px solid var(--accent); font-size:14px; line-height:1.6; display:none;}
+  .theory h4{color:var(--accent); margin-bottom:7px; font-size:12px; text-transform:uppercase; letter-spacing:.4px;}
+  .theory.show{display:block;}
+  /* итоги */
+  .score-big{font-size:46px; font-weight:700; text-align:center; margin:8px 0; letter-spacing:.5px;}
+  .score-big.good{color:var(--green);} .score-big.mid{color:var(--amber);} .score-big.low{color:var(--red);}
+  .score-sub{text-align:center; color:var(--muted); margin-bottom:16px; font-size:14px;}
+  .progress{height:6px; background:var(--panel2); border-radius:3px; overflow:hidden; margin:16px 0 8px;}
+  .progress div{height:100%; background:var(--accent); width:0%; transition:.3s; border-radius:3px;}
+  .progbar{color:var(--muted); font-size:12px; text-align:right;}
+  .hidden{display:none;}
+  hr.divider{border:none; border-top:1px solid var(--border); margin:14px 0;}
+  /* меню выбора раздела */
+  .menu-nav{text-align:center; margin-bottom:22px;}
+  .menu-nav .btn-back{display:inline-flex; align-items:center; gap:6px; padding:7px 14px;
+    font-size:13px; font-weight:600; background:var(--panel2); color:var(--text);
+    border:1px solid var(--border); border-radius:6px; cursor:pointer; font-family:inherit;
+    transition:background .12s, border-color .12s;}
+  .menu-nav .btn-back:hover{background:#ebedf1; border-color:#c2cad6;}
+  .section-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .section-card{
+    display:flex; flex-direction:column; text-align:left; padding:22px 20px;
+    background:var(--panel); border:1px solid var(--border); border-radius:8px;
+    cursor:pointer; transition:border-color .12s, background .12s; font-family:inherit;
+    text-decoration:none; color:var(--text);
+  }
+  .section-card:hover{border-color:var(--accent); background:#f6f9fd;}
+  .section-card .sec-title{font-size:17px; font-weight:700; margin-bottom:6px; color:var(--text);}
+  .section-card .sec-desc{font-size:13.5px; color:var(--muted); line-height:1.5;}
+  .section-card .sec-arrow{font-size:13px; color:var(--accent); font-weight:600; margin-top:14px;}
+  .notice{padding:18px 20px; border:1px dashed var(--border); border-radius:8px;
+    text-align:center; color:var(--muted); font-size:14px; background:var(--panel2);}
+  .notice b{color:var(--text);}
+  @media (max-width:520px){ .section-grid{grid-template-columns:1fr;} }
+  /* контрольная работа */
+  .ctrl-lead{font-size:13.5px; color:var(--muted); line-height:1.5; margin:-4px 0 14px;}
+  .ctrl-partname{font-size:13px; color:var(--muted); margin-top:10px; min-height:18px;}
+  .ctrl-check{display:flex; align-items:center; gap:10px; cursor:pointer; padding:10px 0 2px; font-size:14.5px;}
+  .ctrl-check input{width:16px; height:16px; accent-color:var(--accent);}
+  .answer-input{
+    width:100%; padding:12px 13px; font-size:15px; font-family:inherit; color:var(--text);
+    background:var(--panel2); border:1px solid var(--border); border-radius:6px; outline:none;
+    transition:border-color .12s, background .12s;
+  }
+  .answer-input:focus{border-color:var(--accent); background:#fff;}
+  .answer-input.correct{border-color:var(--green); background:#f0f7f2;}
+  .answer-input.wrong{border-color:var(--red); background:#fdf1f0;}
+  /* навигатор по вопросам (в стиле Moodle) */
+  .ctrl-layout{display:grid; grid-template-columns:minmax(0,1fr) 190px; gap:16px; align-items:start;}
+  .ctrl-nav{position:sticky; top:16px; padding:16px 14px;}
+  .ctrl-nav h2{margin-bottom:10px;}
+  .ctrl-nav-grid{display:grid; grid-template-columns:repeat(5,1fr); gap:4px;
+    max-height:56vh; overflow-y:auto; padding-right:2px;}
+  .ctrl-nav-btn{
+    padding:0; aspect-ratio:1/1; display:flex; align-items:center; justify-content:center;
+    font-family:inherit; font-size:11px; font-weight:600; line-height:1; color:var(--text);
+    background:var(--panel2); border:1px solid var(--border); border-radius:4px; cursor:pointer;
+    transition:border-color .12s, background .12s;
+  }
+  .ctrl-nav-btn:hover{border-color:#c2cad6; background:#ebedf1;}
+  .ctrl-nav-btn.current{border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent);}
+  .ctrl-nav-btn.ok{background:#e8f5ec; border-color:var(--green); color:var(--green);}
+  .ctrl-nav-btn.bad{background:#fdf1f0; border-color:var(--red); color:var(--red);}
+  .ctrl-nav-legend{display:flex; flex-wrap:wrap; gap:5px 10px; margin-top:10px; font-size:11px; color:var(--muted);}
+  .ctrl-nav-legend span{display:inline-flex; align-items:center; gap:4px;}
+  .ctrl-nav-legend i{width:9px; height:9px; border-radius:2px; display:inline-block;
+    border:1px solid var(--border); background:var(--panel2); font-style:normal;}
+  .ctrl-nav-legend i.ok{background:#e8f5ec; border-color:var(--green);}
+  .ctrl-nav-legend i.bad{background:#fdf1f0; border-color:var(--red);}
+  .ctrl-nav-legend i.cur{border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent);}
+  .ctrl-finish{width:100%; margin-top:10px;}
+  @media (max-width:760px){
+    .ctrl-layout{grid-template-columns:1fr;}
+    .ctrl-nav{position:static; order:2;}
+    .ctrl-nav-grid{grid-template-columns:repeat(8,1fr); max-height:32vh;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Подготовка к тесту БЖД</h1>
+    <p>Лазерное излучение · УФИ · Искусственное освещение</p>
+  </header>
+
+  <!-- ГЛАВНОЕ МЕНЮ: ВЫБОР РАЗДЕЛА -->
+  <div id="homeScreen">
+    <div class="section-grid">
+      <button class="section-card" id="goPractice">
+        <div class="sec-title">Тесты по практикам</div>
+        <div class="sec-desc">Тренировочные тесты по темам: лазерное излучение, УФИ, искусственное освещение, тепловые излучения. Выбор количества вопросов и тем, проверка ответов с теорией.</div>
+        <div class="sec-arrow">Перейти →</div>
+      </button>
+      <button class="section-card" id="goControl">
+        <div class="sec-title">Подготовка к контрольной работе</div>
+        <div class="sec-desc">229 вопросов по четырём лекциям: наука БЖД, классификация негативных факторов, микроклимат, вредные вещества и пыль. Навигатор по вопросам, проверка ответов и разбор ошибок.</div>
+        <div class="sec-arrow">Перейти →</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- СТАРТОВЫЙ ЭКРАН: ТЕСТЫ ПО ПРАКТИКАМ -->
+  <div id="startScreen" class="hidden">
+    <div class="menu-nav">
+      <button class="btn-back" id="backHome1">← На главную</button>
+    </div>
+    <div class="card">
+      <h2>Сколько вопросов в тесте?</h2>
+      <div class="counts" id="countBtns">
+        <button data-count="5">5</button>
+        <button data-count="10">10</button>
+        <button data-count="15">15</button>
+        <button data-count="20">20</button>
+        <button data-count="all">Все</button>
+      </div>
+      <div class="progbar" style="margin-top:8px;">Выбери количество вопросов</div>
+    </div>
+    <div class="card">
+      <h2>Темы</h2>
+      <div class="themes">
+        <label><input type="checkbox" class="theme" data-key="laser" checked> Тема 1. Лазерное излучение</label>
+        <label><input type="checkbox" class="theme" data-key="ufi" checked> Тема 2. УФИ (Ультрафиолетовое излучение)</label>
+        <label><input type="checkbox" class="theme" data-key="light" checked> Тема 3. Искусственное освещение</label>
+        <label><input type="checkbox" class="theme" data-key="heat" checked> Тема 4. Тепловые излучения</label>
+      </div>
+      <hr class="divider">
+      <label style="display:flex; align-items:center; gap:10px; cursor:pointer; padding:6px 0;">
+        <input type="checkbox" id="shuffleOptsCheck" style="width:20px; height:20px; accent-color:var(--accent);">
+        <span style="font-size:14.5px;">Перемешивать варианты ответов в каждом вопросе</span>
+      </label>
+      <button class="btn-primary" id="startBtn">Начать тест</button>
+    </div>
+  </div>
+
+  <!-- ЭКРАН: ПОДГОТОВКА К КОНТРОЛЬНОЙ РАБОТЕ -->
+  <div id="controlScreen" class="hidden">
+    <div class="menu-nav">
+      <button class="btn-back" id="backHome2">← На главную</button>
+    </div>
+
+    <!-- ВЫБОР ЛЕКЦИИ -->
+    <div id="ctrlIntro">
+      <div class="card">
+        <h2>Подготовка к контрольной работе</h2>
+        <p class="ctrl-lead">Выберите лекцию или смешайте все вопросы подряд. В разделе 229 вопросов по четырём лекциям.</p>
+        <div class="counts" id="ctrlParts">
+          <button data-part="1">Лекция 1 · 65</button>
+          <button data-part="2">Лекция 2 · 40</button>
+          <button data-part="3">Лекция 3 · 70</button>
+          <button data-part="4">Лекция 4 · 54</button>
+          <button data-part="all">Все · 229</button>
+        </div>
+        <div class="ctrl-partname" id="ctrlPartName"></div>
+        <label class="ctrl-check">
+          <input type="checkbox" id="ctrlShuffle">
+          <span>Перемешивать вопросы</span>
+        </label>
+        <button class="btn-primary" id="ctrlStart">Начать</button>
+      </div>
+    </div>
+
+    <!-- ВОПРОС -->
+    <div id="ctrlQuiz" class="hidden">
+      <div class="ctrl-layout">
+        <div class="card" id="ctrlQcard">
+          <div class="qmeta">
+            <span id="ctrlProgress">Вопрос 1 / 10</span>
+            <span class="badge theme1" id="ctrlBadge">Лекция</span>
+          </div>
+          <div class="progress"><div id="ctrlBar"></div></div>
+          <div class="progbar" id="ctrlScore"></div>
+          <div class="qtext" id="ctrlQtext"></div>
+          <div id="ctrlOptions"></div>
+          <div id="ctrlAnswerWrap" class="hidden">
+            <input type="text" id="ctrlAnswer" class="answer-input" autocomplete="off" placeholder="Впишите ответ" aria-label="Ответ на вопрос">
+          </div>
+          <div class="result" id="ctrlResult"></div>
+          <div class="flex-row" style="margin-top:16px; flex-wrap:wrap;">
+            <button class="btn-ghost" id="ctrlCheck">Проверить</button>
+            <button class="btn-ghost hidden" id="ctrlNext">Следующий вопрос</button>
+            <button class="btn-ghost" id="ctrlExit">Выход в главное меню</button>
+          </div>
+        </div>
+
+        <aside class="card ctrl-nav">
+          <h2>Вопросы</h2>
+          <div class="ctrl-nav-grid" id="ctrlNavGrid"></div>
+          <div class="ctrl-nav-legend">
+            <span><i class="ok"></i>верно</span>
+            <span><i class="bad"></i>ошибка</span>
+            <span><i class="cur"></i>текущий</span>
+          </div>
+          <button class="btn-ghost ctrl-finish" id="ctrlFinish">Завершить тест</button>
+        </aside>
+      </div>
+    </div>
+
+    <!-- ИТОГИ -->
+    <div id="ctrlEnd" class="hidden">
+      <div class="card">
+        <div class="score-big" id="ctrlFinalScore">0%</div>
+        <div class="score-sub" id="ctrlFinalSub"></div>
+        <div id="ctrlReview" style="margin-top:14px;"></div>
+        <button class="btn-ghost" style="width:100%;" id="ctrlRestart">Пройти ещё раз</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ЭКРАН ВОПРОСА -->
+  <div id="quizScreen" class="hidden">
+    <div class="card">
+      <div class="qmeta">
+        <span id="qProgress">Вопрос 1 / 10</span>
+        <span class="badge" id="qTheme">Тема</span>
+      </div>
+      <div class="progress"><div id="qbar"></div></div>
+      <div class="progbar" id="scoreLine"></div>
+      <div class="qtext" id="qtext"></div>
+      <div id="options"></div>
+      <div class="result" id="result"></div>
+      <div class="theory" id="theory"><h4>Теория</h4><p id="theoryText"></p></div>
+      <div class="flex-row" style="margin-top:16px; flex-wrap:wrap;">
+        <button class="btn-ghost" id="checkBtn">Проверить</button>
+        <button class="btn-ghost hidden" id="nextBtn">Следующий вопрос</button>
+        <button class="btn-ghost" id="exitBtn">Выход в главное меню</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ЭКРАН ИТОГОВ -->
+  <div id="endScreen" class="hidden">
+    <div class="card">
+      <div class="score-big" id="finalScore">0%</div>
+      <div class="score-sub" id="finalSub"></div>
+      <div id="errorReview" style="margin-top:14px;"></div>
+      <button class="btn-ghost" style="width:100%;" id="restartBtn">Пройти ещё раз</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================= ДАННЫЕ ВОПРОСОВ ================= */
+const DATA = {
+  laser: {
+    title: "Тема 1. Лазерное излучение",
+    cls: "theme1",
+    questions: [
+      {q:"Фотохимическое действие лазерного излучения на организм человека:",
+       multi:false,
+       opts:["проявляется в выцветании ряда красителей","это деформация молекул в электрическом поле лазерного излучения","заключается в том, что при фокусировке лазерного излучения выделяется значительное количество теплоты в небольшом объеме за короткий промежуток времени","проявляется в возникновении колебаний типа ультразвуковых в облучаемом организме","определяется большим градиентом электрического поля, обусловленного высокой плотностью мощности"],
+       ans:"проявляется в выцветании ряда красителей",
+       th:"Фотохимическое действие лазерного излучения проявляется в выцветании ряда красителей."},
+      {q:"Лазер IМ класса по степени опасности выходного — это лазеры, которые:",
+       multi:false,
+       opts:["Полностью безопасные лазеры, выходное прямое излучение которых не представляет опасности для глаз и кожи","Безопасны. Однако выходное прямое излучение представляет опасность для глаз после прохождения через \"усиливающую\" оптику","Безопасны. Только лазеры в видимом диапазоне 400–700 нм при мощности не более 1 мВт, время воздействия не превышает 0,25 с","Опасны при прямом и диффузно отраженном излучении для глаз и кожи","Опасны при прямом воздействии на глаза, диффузно отраженное излучение опасности не представляет"],
+       ans:"Безопасны. Однако выходное прямое излучение представляет опасность для глаз после прохождения через \"усиливающую\" оптику",
+       th:"Лазер класса 1М безопасен, но его прямое излучение представляет опасность для глаз после прохождения через «усиливающую» оптику."},
+      {q:"Апертура лазера – это:",
+       multi:false,
+       opts:["толщина защитного кожуха лазерной установки","внешний диаметр лазерной установки","расстояние от источника лазерного излучения до мишени","отверстие в защитном корпусе лазера, через которое испускается лазерное излучение","толщина поглотителя лазерного излучения"],
+       ans:"отверстие в защитном корпусе лазера, через которое испускается лазерное излучение",
+       th:"Апертура — отверстие в защитном корпусе лазера, через которое испускается лазерное излучение."},
+      {q:"Для определения ПДУ (Нпду, Эпду, Wпду, Рпду) при хроническом воздействии на кожу коллимированного или рассеянного лазерного излучения в диапазоне II (380–1400 нм) необходимо:",
+       multi:false,
+       opts:["увеличить в 20 раз ПДУ для однократного облучения","уменьшить в 5 раз ПДУ для однократного облучения","увеличить в 10 раз ПДУ для однократного облучения","уменьшить в 20 раз ПДУ для однократного облучения","уменьшить в 10 раз ПДУ для однократного облучения"],
+       ans:"уменьшить в 10 раз ПДУ для однократного облучения",
+       th:"При хроническом воздействии лазерного излучения на кожу предельно допустимые значения уменьшаются в 10 раз по сравнению с однократным воздействием."},
+      {q:"В каком пункте правильно указаны коллективные средства защиты от лазерного излучения:",
+       multi:false,
+       opts:["устройства дистанционного управления, ограждающие устройства, предохранительные устройства, блокировки, устройства автоматического контроля и сигнализации, знаки безопасности","медицинские осмотры, защита временем, защитные экраны, блокировки, защитные очки","технологические халаты, перчатки, очки, щитки, маски","ограждающие устройства, защитные перчатки, устройства дистанционного управления"],
+       ans:"устройства дистанционного управления, ограждающие устройства, предохранительные устройства, блокировки, устройства автоматического контроля и сигнализации, знаки безопасности",
+       th:"К коллективным средствам защиты от лазерного излучения относятся: оградительные устройства, предохранительные устройства (блокировки), устройства автоматического контроля и сигнализации, знаки безопасности, а также устройства дистанционного управления."},
+      {q:"Механическое действие лазерного излучения на организм человека:",
+       multi:false,
+       opts:["проявляется в выцветании ряда красителей","это деформация молекул в электрическом поле лазерного излучения","проявляется в возникновении колебаний типа ультразвуковых в облучаемом организме","заключается в том, что при фокусировке выделяется значительное количество теплоты в небольшом объеме за короткий промежуток времени","определяется большим градиентом электрического поля"],
+       ans:"проявляется в возникновении колебаний типа ультразвуковых в облучаемом организме",
+       th:"Механическое действие лазерного излучения проявляется в возникновении колебаний типа ультразвуковых в облучаемом организме."},
+      {q:"Лазеры 1 класса по степени опасности выходного — это лазеры, которые:",
+       multi:false,
+       opts:["Полностью безопасны, выходное прямое излучение которых не представляет опасности при облучении глаз и кожи","Опасны при прямом и диффузно отраженном излучении для глаз и кожи","Опасны при прямом воздействии на глаза, диффузно отраженное излучение опасности не представляет","Безопасны. Только лазеры в видимом диапазоне 400–700 нм при мощности не более 1 мВт","Безопасны. Выходное прямое излучение опасно для глаз после прохождения через \"усиливающую\" оптику"],
+       ans:"Полностью безопасны, выходное прямое излучение которых не представляет опасности при облучении глаз и кожи",
+       th:"Лазеры 1 класса — полностью безопасные: их прямое излучение не опасно ни для глаз, ни для кожи."},
+      {q:"ПДУ лазерного излучения устанавливаются для двух условий облучения:",
+       multi:false,
+       opts:["однократного и хронического облучения глаз, а также однократного и хронического облучения кожи","однократного и хронического облучения глаз","однократного и хронического облучения кожи","однократного и хронического облучения всего тела","общего и локального"],
+       ans:"однократного и хронического облучения глаз, а также однократного и хронического облучения кожи",
+       th:"ПДУ лазерного излучения устанавливаются раздельно для случаев однократного и хронического облучения глаз, а также однократного и хронического облучения кожи."},
+      {q:"Предупредительный дозиметрический контроль заключается в определении максимальных уровней энергетических параметров ЛИ:",
+       multi:false,
+       opts:["в точках на границе рабочей зоны","отраженного от зеркально отражающей поверхности","на выходе из защитного кожуха лазера","воздействующего на облучаемую мишень","воздействующего на глаза (кожу) конкретного работника в течение рабочего дня"],
+       ans:"в точках на границе рабочей зоны",
+       th:"Предупредительный дозиметрический контроль проводится в точках на границе рабочей зоны (индивидуальный — на глазах/коже конкретного работника)."},
+      {q:"В каком пункте правильно указаны только средства индивидуальной защиты от лазерного излучения:",
+       multi:false,
+       opts:["оградительные устройства, предохранительные устройства, блокировки, знаки безопасности","устройства дистанционного управления, знаки безопасности, очки, щитки, маски","оградительные устройства, защитные перчатки, устройства дистанционного управления","технологические халаты, перчатки, очки, щитки, маски","медицинские осмотры, защита временем, защитные экраны, блокировки"],
+       ans:"технологические халаты, перчатки, очки, щитки, маски",
+       th:"К СИЗ от лазерного излучения относятся технологические халаты, перчатки, очки, щитки и маски."},
+      {q:"По какой формуле определяется энергетическая экспозиция, усредненная по ограничивающей апертуре?",
+       multi:false,
+       opts:["Eпду = Pпду / Sa","Hпду = Wпду / Sa","Hпду = Pпду / Sa","Hпду = Wпду / Pпду","Eпду = Wпду / Sa"],
+       ans:"Hпду = Wпду / Sa",
+       th:"Энергетическая экспозиция — отношение энергии излучения к площади апертуры: H = W / Sa."},
+      {q:"Коллимированное лазерное излучение — это:",
+       multi:false,
+       opts:["лазерное излучение, распространяющееся в неограниченном телесном угле","рассеянное излучение","лазерное излучение, заключенное в ограниченном телесном угле","нет правильного ответа","любое из перечисленных выше"],
+       ans:"лазерное излучение, заключенное в ограниченном телесном угле",
+       th:"Коллимированное лазерное излучение — излучение, заключенное в ограниченном телесном угле."},
+      {q:"Электрострикционное действие лазерного излучения на организм человека:",
+       multi:false,
+       opts:["проявляется в выцветании ряда красителей","проявляется в возникновении колебаний типа ультразвуковых","определяется большим градиентом электрического поля","это деформация молекул в электрическом поле лазерного излучения","заключается в том, что при фокусировке выделяется значительное количество теплоты"],
+       ans:"это деформация молекул в электрическом поле лазерного излучения",
+       th:"Электрострикция — деформация молекул в электрическом поле лазерного излучения."},
+      {q:"К какому диапазону лазерного излучения относится длина волны лазера (650 нм), исследуемого в данной лабораторной работе?",
+       multi:false,
+       opts:["менее 180 нм","от 1400 до 10⁵ нм","от 380 до 1400 нм","более 10⁵ нм","от 180 до 380 нм"],
+       ans:"от 380 до 1400 нм",
+       th:"Лазер с длиной волны 650 нм относится ко II диапазону (380 < λ ≤ 1400 нм)."},
+      {q:"Индивидуальный дозиметрический контроль лазерного излучения заключается в измерении:",
+       multi:false,
+       opts:["уровней энергетических параметров излучения, отраженного от зеркально отражающей поверхности","уровней энергетических параметров излучения, воздействующего на глаза (кожу) конкретного работника в течение рабочего дня","уровней энергетических параметров излучения, воздействующего на облучаемую мишень","уровней энергетических параметров излучения, на выходе из защитного кожуха лазера","уровней энергетических параметров лазерного излучения, отраженного от диффузно отражающей поверхности"],
+       ans:"уровней энергетических параметров излучения, воздействующего на глаза (кожу) конкретного работника в течение рабочего дня",
+       th:"Индивидуальный дозиметрический контроль заключается в измерении уровней энергетических параметров излучения, воздействующего на глаза (кожу) конкретного работника в течение рабочего дня. Проводится при работе на открытых лазерных установках, а также когда не исключено случайное воздействие ЛИ на глаза и кожу."},
+      {q:"Энергетическое действие лазерного излучения на организм человека:",
+       multi:false,
+       opts:["заключается в том, что при фокусировке лазерного излучения выделяется значительное количество теплоты в небольшом объеме за короткий промежуток времени","это деформация молекул в электрическом поле лазерного излучения","определяется большим градиентом электрического поля, обусловленного высокой плотностью мощности. Это действие может вызывать поляризацию молекул, резонансные и другие эффекты","проявляется в выцветании ряда красителей","проявляется в возникновении колебаний типа ультразвуковых в облучаемом организме"],
+       ans:"определяется большим градиентом электрического поля, обусловленного высокой плотностью мощности. Это действие может вызывать поляризацию молекул, резонансные и другие эффекты",
+       th:"Энергетическое действие лазерного излучения определяется большим градиентом электрического поля, обусловленного высокой плотностью мощности. Оно может вызывать поляризацию молекул, резонансные и другие эффекты."},
+      {q:"Когда проводится индивидуальный дозиметрический контроль лазерного излучения?",
+       multi:false,
+       opts:["при внесении изменений в конструкцию действующих лазерных изделий","при изменении конструкции средств коллективной защиты","при организации новых рабочих мест","при приемке в эксплуатацию новых лазерных изделий II–IV классов","при работе на открытых лазерных установках (экспериментальные стенды), а также в тех случаях, когда не исключено случайное воздействие лазерного излучения на глаза и кожу"],
+       ans:"при работе на открытых лазерных установках (экспериментальные стенды), а также в тех случаях, когда не исключено случайное воздействие лазерного излучения на глаза и кожу",
+       th:"Индивидуальный дозиметрический контроль проводится при работе на открытых лазерных установках (экспериментальные стенды), а также когда не исключено случайное воздействие лазерного излучения на глаза и кожу. Варианты про конструкцию, средства защиты и новые рабочие места относятся к предупредительному контролю."}
+    ]
+  },
+  ufi: {
+    title: "Тема 2. УФИ (Ультрафиолетовое излучение)",
+    cls: "theme2",
+    questions: [
+      {q:"Длина волны ультрафиолетового излучения области В составляет:",
+       multi:false,
+       opts:["780…1400 нм","1400…3000 нм","400…315 нм","315…280 нм","280…200 нм"],
+       ans:"315…280 нм",
+       th:"Области УФ: А – 400…315 нм, В – 315…280 нм, С – 280…200 нм. Области В соответствует 315…280 нм."},
+      {q:"УФ излучение области С (280–200 нм) оказывает на организм человека следующее действие:",
+       multi:false,
+       opts:["вызывает пневмокониозы","вызывает перегрев организма, судороги, потерю сознания","оказывает слабое биологическое действие, вызывающее преимущественно флюоресценцию","вызывает основные изменения в коже (загарное и антирахитическое воздействие), крови, нервной системе","оказывает бактерицидное действие, т.к. вызывает коагуляцию белков"],
+       ans:"оказывает бактерицидное действие, т.к. вызывает коагуляцию белков",
+       th:"УФ области С обладает бактерицидным действием, так как вызывает коагуляцию белков."},
+      {q:"Каков ПДУ УФ излучения области С, если площадь незащищенных участков кожи 0,19 м², время однократного облучения 4 мин, за смену облучение 10 раз с интервалом 35 мин?",
+       multi:false,
+       opts:["0,01 Вт/м²","0,05 Вт/м²","50,0 Вт/м²","0,001 Вт/м²","10,0 Вт/м²"],
+       ans:"0,001 Вт/м²",
+       th:"При площади кожи ≤0,2 м², длительности облучения до 5 мин, паузах не менее 30 мин и общей длительности до 60 мин/смену ПДУ: УФ-А = 50 Вт/м², УФ-В = 0,05 Вт/м², УФ-С = 0,001 Вт/м². Здесь все условия соблюдены → УФ-С = 0,001 Вт/м²."},
+      {q:"ПДУ УФ излучения области С (0,1 м², время однократного облучения 17 мин, за смену 16 раз) равен:",
+       multi:false,
+       opts:["0,05 Вт/м²","не допускается","0,01 Вт/м²","10 Вт/м²","0,001 Вт/м²"],
+       ans:"не допускается",
+       th:"При длительности однократного облучения свыше 5 мин и общей продолжительности воздействия 50 % рабочей смены излучение области УФ-С не допускается."},
+      {q:"Средства коллективной защиты от ультрафиолетового излучения включают: (отметьте все верные)",
+       multi:true,
+       opts:["щитки со светофильтрами, защитные очки","применение специальных мазей, содержащих вещества-светофильтры","рациональное размещение рабочих мест","экранирование источника излучения","экранирование рабочих мест"],
+       ans:["экранирование источника излучения","экранирование рабочих мест"],
+       th:"Коллективные меры защиты от УФ: экранирование источников излучения, экранирование рабочих мест и рациональное размещение рабочих мест. Щитки, очки и мази — это средства индивидуальной защиты (СИЗ)."},
+      {q:"Средства коллективной защиты от ультрафиолетового излучения включают: (отметьте все верные)",
+       multi:true,
+       opts:["экранирование рабочих мест","рациональное размещение рабочих мест","применение специальных масок, содержащих вещества-светофильтры","щитки со светофильтрами, защитные очки","экранирование источника излучения"],
+       ans:["экранирование рабочих мест","экранирование источника излучения"],
+       th:"Коллективные меры защиты от УФ: экранирование источников излучения, экранирование рабочих мест и рациональное размещение рабочих мест. Маски и щитки — СИЗ."},
+      {q:"ПДУ УФ излучения области С (0,1 м², 17 мин, за смену 16 раз) равен:",
+       multi:false,
+       opts:["0,01 Вт/м²","10 Вт/м²","не допускается","0,001 Вт/м²","0,05 Вт/м²"],
+       ans:"не допускается",
+       th:"При длительности однократного облучения свыше 5 мин излучение УФ-С не допускается."},
+      {q:"ПДУ ультрафиолетового излучения зависит от:",
+       multi:false,
+       opts:["времени воздействия","интенсивности ультрафиолетового излучения","частоты излучения","длины волны излучения, времени воздействия излучения на человека, доли поверхности тела человека, подвергающейся облучению","расстояния до источника"],
+       ans:"длины волны излучения, времени воздействия излучения на человека, доли поверхности тела человека, подвергающейся облучению",
+       th:"ПДУ УФ устанавливаются в зависимости от длины волны (область А/В/С), времени воздействия и площади (доли) незащищённой поверхности кожи."},
+      {q:"УФ излучение области А (390–315 нм) оказывает на человека следующее действие:",
+       multi:false,
+       opts:["оказывает слабое биологическое действие, вызывающее преимущественно флюоресценцию","вызывает основные изменения в коже (загарное и антирахитическое воздействие), крови, нервной системе","вызывает перегрев организма, судороги, потерю сознания","оказывает бактерицидное действие, т.к. вызывает коагуляцию белков"],
+       ans:"оказывает слабое биологическое действие, вызывающее преимущественно флюоресценцию",
+       th:"УФ области А отличается слабым биологическим действием, вызывающим преимущественно флюоресценцию."},
+      {q:"Длина волны ультрафиолетового излучения области А составляет:",
+       multi:false,
+       opts:["780…1400 нм","400…315 нм","1400…3000 нм","315…280 нм","280…200 нм"],
+       ans:"400…315 нм",
+       th:"УФ области А — λ = 400…315 нм."},
+      {q:"Тела начинают генерировать ультрафиолетовое излучение при нагревании их свыше:",
+       multi:false,
+       opts:["1200 °C","1800 °C","1400 °C","1400 °C","2000 °C"],
+       ans:"1200 °C",
+       th:"Тела начинают генерировать УФ при температуре нагрева выше 1200 °C."},
+      {q:"Каков ПДУ УФ излучения области С (0,19 м², 4 мин, за смену 10 раз с интервалом 35 мин)?",
+       multi:false,
+       opts:["0,01 Вт/м²","0,05 Вт/м²","0,001 Вт/м²","10,0 Вт/м²","50,0 Вт/м²"],
+       ans:"0,001 Вт/м²",
+       th:"При площади кожи ≤0,2 м², облучении до 5 мин и паузах ≥30 мин ПДУ УФ-С = 0,001 Вт/м²."},
+      {q:"ПДУ УФ излучения области А (0,1 м², время однократного облучения 27 мин, за смену 10 раз) равен:",
+       multi:false,
+       opts:["0,001 Вт/м²","10 Вт/м²","0,01 Вт/м²","0,05 Вт/м²","не допускается"],
+       ans:"10 Вт/м²",
+       th:"При длительности однократного облучения свыше 5 мин и общей продолжительности 50 % рабочей смены ПДУ УФ-А = 10 Вт/м² (УФ-В = 0,01 Вт/м²)."},
+      {q:"Для защиты от ультрафиолетового излучения применяются следующие СИЗ:",
+       multi:false,
+       opts:["защитные экраны, щитки, специальные мази","увеличение расстояния до источника, защитные экраны","спецодежда, рукавицы, фартуки, щитки, экранирование источника","медицинские осмотры, защитные экраны, ограничение времени","спецодежда (куртки, брюки), рукавицы, фартуки, щитки со светофильтрами или защитные очки, специальные мази с содержанием веществ-светофильтров"],
+ans:"спецодежда (куртки, брюки), рукавицы, фартуки, щитки со светофильтрами или защитные очки, специальные мази с содержанием веществ-светофильтров",
+        th:"СИЗ от УФ: спецодежда (куртки, брюки), рукавицы, фартуки, щитки со светофильтрами или защитные очки, а также специальные мази с веществами-светофильтрами для защиты кожи."},
+      {q:"ПДУ УФ излучения области В и С при использовании специальной одежды и средств защиты лица и рук:",
+        multi:false,
+        opts:["0,001 Вт/м²","10 Вт/м²","1,0 Вт/м²","0,05 Вт/м²","0,01 Вт/м²"],
+        ans:"1,0 Вт/м²",
+        th:"Допустимая интенсивность УФ-облучения при использовании специальной одежды и средств защиты лица и рук не должна превышать 1 Вт/м² в области УФ-В + УФ-С (200…315 нм)."},
+      {q:"Ультрафиолетовое излучение области В (от 315 до 280 нм) оказывает на организм человека следующее действие:",
+        multi:false,
+        opts:["вызывает основные изменения в коже (загарное и антирахитическое воздействие), крови, нервной системе, системе кровообращения и других органах","вызывает перегрев организма, судороги, потерю сознания","оказывает бактерицидное действие, т.к. вызывает коагуляцию белков","оказывает слабое биологическое действие, вызывающее преимущественно флюоресценцию"],
+        ans:"вызывает основные изменения в коже (загарное и антирахитическое воздействие), крови, нервной системе, системе кровообращения и других органах",
+        th:"УФ излучение области В вызывает основные изменения в коже (загарное и антирахитическое действие), крови, нервной системе, кровообращении и других органах."},
+      {q:"Длина волны ультрафиолетового излучения области С составляет:",
+        multi:false,
+        opts:["1400…3000 нм","780…1400 нм","280…200 нм","315…280 нм","400…315 нм"],
+        ans:"280…200 нм",
+        th:"УФ области С — λ = 280…200 нм. (Области: А – 400…315, В – 315…280, С – 280…200 нм.)"},
+      {q:"Каков ПДУ УФ излучения области А, если площадь незащищенных участков кожи 0,1 м², время однократного облучения 3 минуты, за смену 5 раз с интервалом 1,5 часа?",
+        multi:false,
+        opts:["10,0 Вт/м²","0,05 Вт/м²","0,001 Вт/м²","0,01 Вт/м²","50,0 Вт/м²"],
+        ans:"50,0 Вт/м²",
+        th:"При незащищённых участках кожи ≤0,2 м², времени облучения до 5 мин, паузах ≥30 мин и общей продолжительности за смену до 60 мин: УФ-А = 50 Вт/м², УФ-В = 0,05 Вт/м², УФ-С = 0,001 Вт/м². Здесь условия соблюдены (3 мин ≤5, 1,5 ч ≥30 мин) → УФ-А = 50 Вт/м²."},
+      {q:"Средства коллективной защиты от ультрафиолетового излучения включают:",
+        multi:false,
+        opts:["экранирование источника излучения, экранирование рабочих мест, спецодежда (куртки, брюки)","экранирование источника излучения, экранирование рабочих мест, щитки со светофильтрами или защитные очки","экранирование источника излучения, экранирование рабочих мест, рукавицы, фартуки","экранирование источника излучения, экранирование рабочих мест, рациональное размещение рабочих мест","экранирование источника излучения, экранирование рабочих мест, специальные мази с содержанием светофильтров"],
+        ans:"экранирование источника излучения, экранирование рабочих мест, рациональное размещение рабочих мест",
+        th:"Коллективные меры защиты от УФ: экранирование источников излучения, экранирование рабочих мест и рациональное размещение рабочих мест. Спецодежда, щитки, очки, рукавицы, фартуки и мази — это СИЗ, а не коллективные средства."}
+     ]
+   },
+  light: {
+    title: "Тема 3. Искусственное освещение",
+    cls: "theme3",
+    questions: [
+      {q:"Перечислите главные характеристики светильника:",
+       multi:false,
+       opts:["Защитный угол и коэффициент полезного действия","Распределение светового потока в пространстве, защитный угол и коэффициент полезного действия","Степень защиты от пыли, влаги и взрыва","Распределение светового потока в пространстве и защитный угол","Способ установки, электроизоляции, размер источника света"],
+       ans:"Распределение светового потока в пространстве, защитный угол и коэффициент полезного действия",
+       th:"Светильники характеризуются распределением светового потока в пространстве, защитным углом и коэффициентом полезного действия."},
+      {q:"В каком виде ламп видимое излучение обеспечивается за счет нагрева электрическим током вольфрамовой нити:",
+       multi:false,
+       opts:["лампы накаливания","люминесцентные лампы","газоразрядные лампы"],
+       ans:"лампы накаливания",
+       th:"Принцип действия ламп накаливания основан на способности раскалённой вольфрамовой нити излучать видимый свет."},
+      {q:"Какие характеристики количественно оценивают достаточность искусственного освещения по нормативному документу:",
+       multi:false,
+       opts:["Средняя освещенность","Минимальные величины светового потока и силы света","Фон, контраст объекта различения с фоном, коэффициент пульсации","Коэффициент естественного освещения и объединенный показатель дискомфорта","Минимальная освещенность"],
+       ans:"Средняя освещенность",
+       th:"Количественный нормируемый параметр искусственного освещения — средняя освещённость рабочей поверхности. Качественные — яркость, коэффициент пульсации, объединённый показатель дискомфорта."},
+      {q:"Определите условия, при наличии которого применяется общее равномерное освещение:",
+       multi:false,
+       opts:["Распределение светового потока без учета расположения оборудования","Распределение светового потока над наиболее важными рабочими местами","Нет правильного ответа"],
+       ans:"Распределение светового потока без учета расположения оборудования",
+       th:"Общее равномерное освещение обеспечивает равномерное распределение светового потока без учёта расположения оборудования. Общее локализованное — с учётом расположения рабочих мест."},
+      {q:"Что понимается под контрастом объекта различия с фоном?",
+       multi:false,
+       opts:["Отношение абсолютной величины разницы между яркостями объекта и фона к яркости фона","Средняя геометрическая величина между яркостями объекта различия и фона","Разность между яркостями объекта и фона","Отношение яркости фона к абсолютной величине разницы между яркостями объекта и фона","Отношение величин яркостей объекта и фона"],
+       ans:"Отношение абсолютной величины разницы между яркостями объекта и фона к яркости фона",
+       th:"Контраст объекта различия с фоном — отношение абсолютной величины разности между яркостью объекта и фона к яркости фона."},
+      {q:"Нормативное значение освещенности по нормативному документу определяется:",
+       multi:false,
+       opts:["наименьшим размером объекта различения, контрастом объекта различения с фоном, характеристиками фона","световым потоком источника и конструкцией светильника","высотой светильников по отношению к рабочей поверхности","величиной светового потока источника и наименьшим размером объекта различения","светотехническими характеристиками светильника"],
+       ans:"наименьшим размером объекта различения, контрастом объекта различения с фоном, характеристиками фона",
+       th:"Нормативная освещённость устанавливается по характеристике зрительной работы: наименьшему размеру объекта различения, контрасту объекта с фоном и характеристике фона."},
+      {q:"Если на нижнюю полусферу светильника приходится более 80 % светового потока, то это светильник:",
+       multi:false,
+       opts:["преимущественно прямого света","преимущественно отраженного света","прямого света","отраженного света","рассеянного света"],
+       ans:"прямого света",
+       th:"Классы светильников: прямого П (>80%), преимущественно прямого Н (60–80%), рассеянного Р (40–60%), преимущественно отраженного В (20–40%), отраженного О (<20%). Более 80% → прямого света."},
+      {q:"Укажите правильную размерность освещенности:",
+       multi:false,
+       opts:["Люкс (лк)","кд/м²","Кандела (кд)","лк/м²","Люмен (лм)"],
+       ans:"Люкс (лк)",
+       th:"Единица освещённости — люкс (лк). Кандела — сила света (кд), люмен — световой поток (лм)."},
+      {q:"Перечислите качественные показатели освещения, нормируемые по нормативному документу:",
+       multi:false,
+       opts:["Коэффициент пульсации, объединенный показатель дискомфорта","Освещенность и яркость","Световой поток Ф и сила света","Контраст объекта различения с фоном и характеристика фона","Коэффициент пульсации, объединенный показатель дискомфорта, освещенность и яркость"],
+       ans:"Коэффициент пульсации, объединенный показатель дискомфорта",
+       th:"Качественные нормируемые показатели: коэффициент пульсации освещённости и объединённый показатель дискомфорта. (Освещённость и яркость — количественные.)"},
+      {q:"Преимущества какого вида ламп — высокая световая отдача, длительный срок службы, световой поток любого желаемого спектра:",
+       multi:false,
+       opts:["галогеновые лампы","газоразрядные лампы","лампы накаливания"],
+       ans:"газоразрядные лампы",
+       th:"Преимущества газоразрядных ламп: высокая светоотдача, большой срок службы (до 12 000 ч), спектр, близкий к естественному (люминесцентные лампы)."},
+      {q:"Какие типы светильников по доле светового потока на нижнюю полусферу Вам известны:",
+       multi:false,
+       opts:["Прямого рассеянного и отраженного света","Прямого, преимущественно прямого и отраженного света","Нет правильного ответа","Прямого, преимущественно отраженного и отраженного света","Прямого, преимущественно прямого, рассеянного, преимущественно отраженного и отраженного света"],
+       ans:"Прямого, преимущественно прямого, рассеянного, преимущественно отраженного и отраженного света",
+       th:"Различают 5 классов светильников: прямого (П), преимущественно прямого (Н), рассеянного (Р), преимущественно отраженного (В), отраженного (О)."},
+      {q:"Как называется прибор, измеряющий освещенность?",
+       multi:false,
+       opts:["Люксметр","Фотоэлемент","Фотометр","Миллиамперметр","Оптический пирометр"],
+       ans:"Люксметр",
+       th:"Освещённость измеряется люксметром."},
+      {q:"Объясните главный принцип нормирования освещенности по нормативному документу:",
+       multi:false,
+       opts:["Нормируемая величина E зависит от наименьшего размера объекта различения","Нормируемая величина E зависит от характеристик фона и контраста объекта размещения с фоном","Нормируемая величина E зависит от наименьшего размера объекта различения, от характеристик фона и контраста объекта размещения с фоном","Нет правильного ответа"],
+       ans:"Нормируемая величина E зависит от наименьшего размера объекта различения, от характеристик фона и контраста объекта размещения с фоном",
+       th:"Нормативная освещённость зависит от размера объекта различения, характеристики фона и контраста объекта с фоном."},
+      {q:"Перечислите группы электрических источников света:",
+       multi:false,
+       opts:["Люминесцентные, дуговые ртутные люминесцентные и металлогалогенные лампы, светодиодные лампы","Газоразрядные лампы низкого и высокого давления","Лампы накаливания: обычные и галогенные, светодиодные лампы","Лампы накаливания, газоразрядные лампы низкого и высокого давления, светодиодные лампы","Дуговые ртутные люминесцентные и натриевые лампы высокого давления"],
+       ans:"Лампы накаливания, газоразрядные лампы низкого и высокого давления, светодиодные лампы",
+       th:"Источники света делятся на 3 группы: лампы накаливания, газоразрядные лампы низкого и высокого давления, светодиоды."},
+      {q:"Если на нижнюю полусферу светильника приходится от 20 до 40 % светового потока, то это светильник:",
+       multi:false,
+       opts:["преимущественно отраженного света","прямого света","рассеянного света","отраженного света","преимущественно прямого света"],
+       ans:"преимущественно отраженного света",
+       th:"Доля 20–40 % на нижнюю полусферу → светильник преимущественно отраженного света (В)."},
+      {q:"Перечислите разновидности систем искусственного освещения по конструктивному исполнению:",
+       multi:false,
+       opts:["Общее и комбинированное","Рабочее и аварийное","Комбинированное и совмещенное","Равномерное и локализованное","Рабочее, дежурное, аварийное и охранное"],
+       ans:"Общее и комбинированное",
+       th:"По конструктивному исполнению различают две системы искусственного освещения: общее (равномерное или локализованное) и комбинированное (общее + местное)."},
+      {q:"Перечислите основные характеристики ламп:",
+       multi:false,
+       opts:["Световой поток, световая отдача и срок службы","Номинальное напряжение питающей сети, электрическая мощность, световой поток, световая отдача и срок службы","Номинальное напряжение питающей сети и электрическая мощность","Спектральный состав создаваемого излучения","Номинальное напряжение, электрическая мощность, световой поток, спектральный состав и срок службы"],
+       ans:"Номинальное напряжение питающей сети, электрическая мощность, световой поток, световая отдача и срок службы",
+       th:"Основные характеристики ламп: номинальное напряжение питающей сети, электрическая мощность, световой поток, световая отдача и срок службы."},
+      {q:"Защитный угол светильника характеризует:",
+       multi:false,
+       opts:["перераспределение светового потока","светопропускание светильника","КПД светильника","степень защиты глаз работающих от чрезмерной яркости источника света"],
+ans:"степень защиты глаз работающих от чрезмерной яркости источника света",
+        th:"Защитный угол светильника определяет степень пространственного ограничения слепящего действия источника света (защита глаз от чрезмерной яркости)."}
+     ]
+  },
+  heat: {
+    title: "Тема 4. Тепловые излучения (Теплозащита)",
+    cls: "theme2",
+    questions: [
+      {q:"Допустимая температура нагрева наружной поверхности термической печи, в которой изделия нагреваются свыше 100°C, составляет:",
+        multi:false,
+        opts:["100 °C","35 °C","45 °C","140 °C","70 °C"],
+        ans:"45 °C",
+        th:"По нормам не допускается нагрев поверхности оборудования и ограждений выше 45 °C, если температура внутри оборудования выше 100 °C (а для оборудования до 100 °C — нагрев до 35 °C)."},
+      {q:"Для прозрачных экранов (защита от теплового излучения) используются следующие материалы:",
+        multi:true,
+        opts:["металлические сетки","силикатное, кварцевое или органическое стекло","пленочные водяные завесы (свободные и стекающие по стеклу)","стекло, армированное запаянной внутри металлической сеткой","цепные звенья (цепные завесы)"],
+        ans:["силикатное, кварцевое или органическое стекло","пленочные водяные завесы (свободные и стекающие по стеклу)"],
+        th:"К прозрачным экранам относятся экраны из различных стёкол: силикатного, кварцевого и органического (бесцветного, окрашенного, металлизированного), а также плёночные водяные завесы (свободные и стекающие по стеклу), вододисперсные завесы. Металлические сетки и цепные звенья — это полупрозрачные экраны."},
+      {q:"Нормируемыми параметрами воздействия теплового излучения являются:",
+        multi:true,
+        opts:["экспозиционная доза","площадь облучаемой поверхности тела","длина волны излучения","температура поверхности источника тепловыделений","интенсивность теплового облучения"],
+        ans:["экспозиционная доза","интенсивность теплового облучения"],
+        th:"Нормируемые параметры воздействия теплового излучения от источников тепла — интенсивность теплового облучения (Вт/м²) и экспозиционная доза теплового облучения (Вт·ч)."},
+      {q:"В результате воздействия инфракрасного (теплового) излучения:",
+        multi:true,
+        opts:["увеличивается насыщенность крови кислородом","нарушается деятельность сердечно-сосудистой и нервной систем","происходят биохимические сдвиги","снижается температура тела","уменьшается насыщенность крови кислородом"],
+        ans:["нарушается деятельность сердечно-сосудистой и нервной систем","происходят биохимические сдвиги","уменьшается насыщенность крови кислородом"],
+        th:"Инфракрасные лучи оказывают тепловое облучение, при котором происходят биохимические сдвиги, уменьшается кислородная насыщенность крови, понижается венозное давление, замедляется кровоток, нарушается деятельность сердечно-сосудистой и нервной систем. (На скриншоте статус «частично правильный» 0,67/1,00 = выбрано 2 из 3.)"},
+      {q:"Длины волн теплового излучения составляют:",
+        multi:false,
+        opts:["0,8…1,2 мкм","1,2…1,9 мкм","1,9…3,7 мкм","0,4…800 мкм","3,7…9,3 мкм"],
+        ans:"0,4…800 мкм",
+        th:"Свойствами теплового излучения обладает электромагнитное излучение в диапазоне длин волн λ = 0,4…800 мкм."},
+        {q:"По принципу действия экраны для защиты от теплового излучения подразделяются на:",
+        multi:true,
+        opts:["теплоотражающие","теплопоглощающие","теплоотводящие","экраны из металлической сетки","экраны из стекла"],
+        ans:["теплоотражающие","теплопоглощающие","теплоотводящие"],
+        th:"По принципу действия тепловые экраны подразделяются на теплоотражающие, теплопоглощающие и теплоотводящие. Любой экран в той или иной степени отражает, поглощает и отводит теплоту, а к группе относят по преобладающему свойству."},
+        {q:"Эффективность теплозащитного экрана определяется по формуле:",
+        multi:false,
+        opts:["η = (Е − Еэ) / Е · 100%","η = Е / Еэ","η = Еэ / Е","η = (Еэ − Е) · 100%","нет правильного ответа"],
+        ans:"η = (Е − Еэ) / Е · 100%",
+        th:"Эффективность теплозащитных экранов: η = (Е − Еэ)/Е · 100 %, где Е — интенсивность теплооблучения без экрана, Еэ — с экраном."}
+     ]
+  }
+};
+
+/* ================= ЛОГИКА ТЕСТА ================= */
+const homeScreen   = document.getElementById('homeScreen');
+const startScreen  = document.getElementById('startScreen');
+const controlScreen= document.getElementById('controlScreen');
+const quizScreen   = document.getElementById('quizScreen');
+const endScreen    = document.getElementById('endScreen');
+const qtext = document.getElementById('qtext');
+const optionsEl = document.getElementById('options');
+const resultEl = document.getElementById('result');
+const theoryEl = document.getElementById('theory');
+const theoryText = document.getElementById('theoryText');
+const checkBtn = document.getElementById('checkBtn');
+const nextBtn = document.getElementById('nextBtn');
+const qProgress = document.getElementById('qProgress');
+const qTheme = document.getElementById('qTheme');
+const qbar = document.getElementById('qbar');
+const scoreLine = document.getElementById('scoreLine');
+
+let selectedCount = 10;
+let activeThemes = ['laser','ufi','light','heat'];
+let shuffleOpts = false;
+let test = [];        // selected questions
+let idx = 0;
+let correctArr = [];  // per-question correct count
+let wrongChoices = {}; // выбранный ошибочный ответ (текст) по индексу вопроса
+let answered = false;
+
+// Подсказки при неверном ответе
+const ROASTS = [
+  "Ответ неверный. Рекомендую перечитать теорию по этой теме перед следующей попыткой.",
+  "Ошибка. В разделе «Теория» к вопросу есть подсказка — обрати внимание на ключевую формулировку.",
+  "Неправильно. Сверься с теорией и обрати внимание на детали в условии.",
+  "Мимо. Запомни правильный вариант, он пригодится на экзамене.",
+  "Ошибочный ответ. Повтори материал по теме, потом вернись к вопросу.",
+  "Неверно. Прочитай теорию — там дан точный ответ на этот вопрос.",
+  "Не получилось. Сравни свой выбор с пояснением под вопросом.",
+  "Ошибка. В следующий раз внимательнее читай варианты ответов.",
+  "Неверный выбор. Теория по вопросу поможет разобраться.",
+  "Правильный ответ подчёркнут. Проанализируй свою ошибку.",
+  "Мимо. Отметь для себя правильный ответ — он важен на экзамене."
+];
+
+document.querySelectorAll('#countBtns button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('#countBtns button').forEach(x=>x.classList.remove('selected'));
+    b.classList.add('selected');
+    selectedCount = b.dataset.count;
+  });
+});
+document.querySelector('.counts button[data-count="10"]').classList.add('selected');
+document.querySelectorAll('.themes .theme').forEach(c=>{
+  c.addEventListener('change',()=>{
+    const sel = document.querySelectorAll('.themes .theme:checked');
+    if(sel.length===0){ c.checked=true; alert('Выберите хотя бы одну тему'); }
+  });
+});
+
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+
+function themeBadge(k){
+  return k==='laser'?'Лазер':k==='ufi'?'УФИ':k==='light'?'Освещение':'Теплозащита';
+}
+function themeName(k){
+  return k==='laser'?'Лазерное излучение':k==='ufi'?'УФИ':k==='light'?'Искусственное освещение':'Тепловые излучения';
+}
+
+document.getElementById('startBtn').addEventListener('click',()=>{
+  shuffleOpts = document.getElementById('shuffleOptsCheck').checked;
+  activeThemes = [...document.querySelectorAll('.themes .theme:checked')].map(x=>x.dataset.key);
+  let pool=[];
+  activeThemes.forEach(k=>{ DATA[k].questions.forEach((q,i)=>pool.push({...q, theme:k})); });
+  if(pool.length===0){ alert('Выберите тему'); return; }
+  pool = shuffle(pool);
+  const n = selectedCount==='all' ? pool.length : Math.min(+selectedCount, pool.length);
+  test = pool.slice(0,n);
+  // перемешать варианты ответов у каждого вопроса, если включено
+  if(shuffleOpts){
+    test.forEach(q=>{ q.opts = shuffle(q.opts.slice()); });
+  }
+  correctArr = new Array(test.length).fill(false);
+  wrongChoices = {};
+  idx=0; showQuestion();
+  startScreen.classList.add('hidden');
+  quizScreen.classList.remove('hidden');
+  endScreen.classList.add('hidden');
+});
+
+function renderOptions(q){
+  optionsEl.innerHTML='';
+  const mask = q.multi ? 'multi' : '';
+  q.opts.forEach((opt,i)=>{
+    const d=document.createElement('div');
+    d.className='opt '+mask;
+    d.innerHTML=`<div class="marker"></div><div class="otext">${opt}</div>`;
+    d.dataset.i=i;
+    d.addEventListener('click',()=>{ if(answered) return; d.classList.toggle('selected'); });
+    optionsEl.appendChild(d);
+  });
+}
+
+function showQuestion(){
+  const q=test[idx];
+  answered=false;
+  qProgress.textContent=`Вопрос ${idx+1} / ${test.length}`;
+  qTheme.textContent=DATA[q.theme].title;
+  qTheme.className='badge '+DATA[q.theme].cls;
+  qbar.style.width=((idx)/test.length*100)+'%';
+  const done = correctArr.filter(Boolean).length;
+  scoreLine.textContent=`Правильно: ${done} / ${idx+1}`;
+  qtext.innerHTML='<span class="badge '+DATA[q.theme].cls+'" style="margin-right:6px;">'+themeBadge(q.theme)+'</span> '+q.q;
+  renderOptions(q);
+  resultEl.className='result'; resultEl.innerHTML='';
+  theoryEl.classList.remove('show');
+  checkBtn.classList.remove('hidden');
+  nextBtn.classList.add('hidden');
+  checkBtn.disabled=false; checkBtn.textContent='Проверить';
+}
+
+function normalize(s){ return s.replace(/\s+/g,' ').trim().toLowerCase(); }
+function ansSet(ansArr){ return ansArr.map(normalize).sort().join('||'); }
+
+checkBtn.addEventListener('click',()=>{
+  const q=test[idx];
+  const chosen=[...optionsEl.querySelectorAll('.opt.selected')].map(o=>q.opts[+o.dataset.i]);
+  if(chosen.length===0){ alert('Выберите ответ'); return; }
+  answered=true;
+
+  // определить правильность
+  let isCorrect=false;
+  if(q.multi){
+    const cSet=ansSet(q.ans);
+    isCorrect = chosen.length===q.ans.length && ansSet(chosen)===cSet;
+  } else {
+    isCorrect = normalize(chosen[0])===normalize(q.ans);
+  }
+  correctArr[idx]=isCorrect;
+  // сохранить выбранный ответ (для разбора ошибок)
+  if(!isCorrect){
+    wrongChoices[idx] = q.multi
+      ? chosen.join('; ')
+      : chosen[0];
+  } else {
+    delete wrongChoices[idx];
+  }
+
+  // разметить опции
+  const ansCorrect = Array.isArray(q.ans)? q.ans.map(normalize) : [normalize(q.ans)];
+  [...optionsEl.querySelectorAll('.opt')].forEach(o=>{
+    const txt=normalize(q.opts[+o.dataset.i]);
+    const isC = ansCorrect.includes(txt);
+    o.classList.add('locked');
+    if(isC) o.classList.add('correct');
+    else if(o.classList.contains('selected')) o.classList.add('wrong');
+  });
+
+  // результат
+  resultEl.className='result show '+(isCorrect?'ok':'bad');
+  resultEl.innerHTML = isCorrect
+    ? '<div class="lbl">Верно</div><div>Правильный ответ отмечен зелёным.</div>'
+    : '<div class="lbl">Неверно</div><div>Правильный ответ выделен зелёным.</div><div style="margin-top:10px;font-style:italic;">' +
+      ROASTS[Math.floor(Math.random()*ROASTS.length)] + '</div>';
+  if(q.multi){
+    resultEl.innerHTML += isCorrect
+      ? ''
+      : '<div style="margin-top:8px;">Нужно было выбрать все верные варианты.</div>';
+  }
+
+  // теория
+  theoryText.innerHTML = q.th;
+  theoryEl.classList.add('show');
+
+  checkBtn.disabled=true;
+  checkBtn.classList.add('hidden');
+  nextBtn.classList.remove('hidden');
+});
+
+nextBtn.addEventListener('click',()=>{
+  idx++;
+  if(idx>=test.length){ showResult(); } else { showQuestion(); }
+});
+
+function showResult(){
+  const correct=correctArr.filter(Boolean).length;
+  const total=test.length;
+  const pct=Math.round(correct/total*100);
+  quizScreen.classList.add('hidden');
+  endScreen.classList.remove('hidden');
+  const score=document.getElementById('finalScore');
+  score.textContent=pct+'%';
+  score.className='score-big '+(pct>=80?'good':pct>=60?'mid':'low');
+  document.getElementById('finalSub').innerHTML=
+    `Правильных ответов: <b>${correct}</b> из <b>${total}</b><br>${pct>=80?'Отличная подготовка!':pct>=60?'Неплохо, но есть над чем поработать.':'Стоит повторить теорию.'}`;
+
+  // --- разбор ошибок ---
+  const errors = [];
+  test.forEach((q,i)=>{
+    if(correctArr[i]) return;
+    errors.push({q, i});
+  });
+  const review = document.getElementById('errorReview');
+  if(errors.length===0){
+    review.innerHTML = `<div style="text-align:center; padding:14px; background:#f0f7f2; border:1px solid var(--green); border-radius:8px; color:var(--green); font-weight:700;">Отличный результат. Ошибок нет.</div>`;
+  } else {
+    const themeName = k => k==='laser'?'Лазерное излучение':k==='ufi'?'УФИ':k==='light'?'Искусственное освещение':'Тепловые излучения';
+    const lbl = DATA;
+    let html = `<div style="border-top:1px solid var(--border); padding-top:14px; margin-top:6px;">`;
+    html += `<h3 style="color:var(--red); margin-bottom:12px; font-size:16px;">Разбор ошибок (${errors.length})</h3>`;
+    errors.forEach(({q,i})=>{
+      const ansLabel = Array.isArray(q.ans) ? q.ans.join('; ') : q.ans;
+      html += `<div style="border:1px solid var(--border); border-radius:10px; padding:12px 14px; margin-bottom:12px; background:var(--panel2);">`;
+      html += `<div style="margin-bottom:6px;"><span class="badge ${DATA[q.theme].cls}" style="margin-right:6px;">${themeName(q.theme)}</span><b>Вопрос ${i+1}</b></div>`;
+      html += `<div class="qtext" style="font-size:14px; margin-bottom:8px;">${q.q}</div>`;
+      html += `<div style="font-size:14px; line-height:1.5;">`;
+      html += `<span style="color:var(--red); font-weight:700;">Ваш ответ:</span> <span id="wrongAns_${i}"></span><br>`;
+      html += `<span style="color:var(--green); font-weight:700;">Правильный:</span> <span style="color:var(--green);">${ansLabel}</span><br>`;
+      html += `</div>`;
+      if(q.th){
+        html += `<div style="margin-top:8px; font-size:13px; background:#f7f9fb; border-left:3px solid var(--accent); padding:8px 10px; color:var(--muted);">${q.th}</div>`;
+      }
+      html += `</div>`;
+    });
+    html += `</div>`;
+    review.innerHTML = html;
+
+    // подставить текст выбранного ошибочного ответа (сохранённого при ответе)
+    errors.forEach(({q,i})=>{
+      const el = document.getElementById('wrongAns_'+i);
+      if(el && wrongChoices[i]){
+        el.textContent = wrongChoices[i];
+      } else if(el){
+        el.textContent = '(не выбран)';
+      }
+    });
+  }
+}
+
+function showHome(){
+  homeScreen.classList.remove('hidden');
+  startScreen.classList.add('hidden');
+  controlScreen.classList.add('hidden');
+  quizScreen.classList.add('hidden');
+  endScreen.classList.add('hidden');
+}
+function showStart(){
+  startScreen.classList.remove('hidden');
+  homeScreen.classList.add('hidden');
+  controlScreen.classList.add('hidden');
+}
+function showControl(){
+  controlScreen.classList.remove('hidden');
+  homeScreen.classList.add('hidden');
+  startScreen.classList.add('hidden');
+  ctrlReset();
+}
+
+document.getElementById('goPractice').addEventListener('click', showStart);
+document.getElementById('goControl').addEventListener('click', showControl);
+document.getElementById('backHome1').addEventListener('click', showHome);
+document.getElementById('backHome2').addEventListener('click', showHome);
+
+document.getElementById('restartBtn').addEventListener('click',()=>{
+  endScreen.classList.add('hidden');
+  startScreen.classList.remove('hidden');
+});
+
+function backToMenu(){
+  if(confirm('Выйти в главное меню? Текущий прогресс будет потерян.')){
+    showHome();
+  }
+}
+document.getElementById('exitBtn').addEventListener('click', backToMenu);
+
+/* ================= ВОПРОСЫ КОНТРОЛЬНОЙ ================= */
+const CONTROL_QUESTIONS = [{"p":1,"t":"fill","q":"Система знаний, обеспечивающая безопасность обитания человека в производственной и непроизводственной среде, — это ______.","a":"безопасность жизнедеятельности (БЖД)"},{"p":1,"t":"fill","q":"Наука, изучающая опасность, количественную характеристику опасности, концепцию приемлемого риска, принципы и методы обеспечения безопасности, — «______».","a":"безопасность жизнедеятельности"},{"p":1,"t":"mc","q":"Какие вопросы рассматриваются в теме?","a":"а","o":[{"l":"а","t":"основные понятия БЖД, опасность и риск, принципы и методы обеспечения безопасности"},{"l":"б","t":"только охрана труда"},{"l":"в","t":"только оказание первой помощи"}]},{"p":1,"t":"fill","q":"______ — это повседневная деятельность и отдых, способ существования человека.","a":"жизнедеятельность"},{"p":1,"t":"fill","q":"БЖД — система знаний, обеспечивающая безопасность обитания человека в ______ и непроизводственной среде.","a":"производственной"},{"p":1,"t":"mc","q":"Объектом изучения БЖД как науки является:","a":"а","o":[{"l":"а","t":"среда и условия обитания человека"},{"l":"б","t":"человек"},{"l":"в","t":"техника и оборудование"}]},{"p":1,"t":"mc","q":"На какие две среды по происхождению делится среда обитания человека?","a":"в","o":[{"l":"а","t":"городская и сельская"},{"l":"б","t":"природная и космическая"},{"l":"в","t":"производственная и непроизводственная"}]},{"p":1,"t":"mc","q":"Что относится к предметам изучения БЖД?","a":"б","o":[{"l":"а","t":"только технические средства"},{"l":"б","t":"физиологические и психологические возможности человека, формирование безопасных условий и их оптимизация"},{"l":"в","t":"только экономические показатели"}]},{"p":1,"t":"fill","q":"Цель БЖД — достижение ______ в средах обитания.","a":"безопасности"},{"p":1,"t":"fill","q":"Одно из направлений цели БЖД — предупреждение ______.","a":"травматизма"},{"p":1,"t":"mc","q":"Что НЕ входит в цели БЖД?","a":"в","o":[{"l":"а","t":"предупреждение травматизма"},{"l":"б","t":"сохранение здоровья и работоспособности"},{"l":"в","t":"увеличение прибыли предприятия"}]},{"p":1,"t":"mc","q":"Сохранение качества полезного труда обеспечивается, в частности:","a":"б","o":[{"l":"а","t":"увеличением рабочего дня"},{"l":"б","t":"профессиональным подбором (учётом темперамента, например холерика и флегматика)"},{"l":"в","t":"отказом от отдыха"}]},{"p":1,"t":"fill","q":"Опасность — свойство живой и неживой материи, способное причинять ______ самой материи: людям, природной среде, материальным ценностям.","a":"ущерб"},{"p":1,"t":"mc","q":"Аксиома БЖД гласит:","a":"б","o":[{"l":"а","t":"любая деятельность абсолютно безопасна"},{"l":"б","t":"любая деятельность потенциально опасна"},{"l":"в","t":"опасность существует только на производстве"}]},{"p":1,"t":"mc","q":"В виде каких потоков реализуются опасности?","a":"а","o":[{"l":"а","t":"энергии, вещества и информации"},{"l":"б","t":"только энергии"},{"l":"в","t":"только информации"}]},{"p":1,"t":"fill","q":"Опасности, создаваемые техническими средствами, называются ______.","a":"техногенными"},{"p":1,"t":"fill","q":"Опасности, возникающие в результате ошибочных или несанкционированных действий человека, называются ______.","a":"антропогенными"},{"p":1,"t":"mc","q":"По видам потоков в жизненном пространстве опасности делятся на энергетические, массовые и:","a":"б","o":[{"l":"а","t":"прогнозируемые"},{"l":"б","t":"информационные"},{"l":"в","t":"реализованные"}]},{"p":1,"t":"mc","q":"По моменту возникновения опасности делятся на:","a":"а","o":[{"l":"а","t":"прогнозируемые и спонтанные"},{"l":"б","t":"реальные и потенциальные"},{"l":"в","t":"естественные и техногенные"}]},{"p":1,"t":"mc","q":"Опасности, обусловленные стихийными явлениями, климатом и рельефом местности, называются:","a":"в","o":[{"l":"а","t":"техногенными"},{"l":"б","t":"антропогенными"},{"l":"в","t":"естественными"}]},{"p":1,"t":"fill","q":"______ опасность представляет угрозу общего характера, не связанную с пространством и временем воздействия.","a":"потенциальная"},{"p":1,"t":"fill","q":"______ опасность — факт воздействия реальной опасности, приведший к потере здоровья, летальному исходу или материальным потерям.","a":"реализованная"},{"p":1,"t":"mc","q":"Реальная опасность:","a":"а","o":[{"l":"а","t":"всегда связана с конкретной угрозой и координирована в пространстве и времени"},{"l":"б","t":"не связана с пространством и временем"},{"l":"в","t":"существует только в теории"}]},{"p":1,"t":"mc","q":"По вероятности воздействия на человека и среду обитания опасности делятся на:","a":"в","o":[{"l":"а","t":"прогнозируемые, спонтанные"},{"l":"б","t":"энергетические, массовые, информационные"},{"l":"в","t":"потенциальные, реальные, реализованные"}]},{"p":1,"t":"fill","q":"______ — событие, состоящее из негативного воздействия с причинением ущерба людским, природным или материальным ресурсам.","a":"происшествие"},{"p":1,"t":"fill","q":"______ происшествие — событие, происходящее кратковременно и обладающее высоким уровнем негативного воздействия.","a":"чрезвычайное"},{"p":1,"t":"mc","q":"К чрезвычайным происшествиям (ЧП) относятся:","a":"в","o":[{"l":"а","t":"только аварии"},{"l":"б","t":"только стихийные бедствия"},{"l":"в","t":"крупные аварии, катастрофы и стихийные бедствия"}]},{"p":1,"t":"mc","q":"Реализованные опасности принято разделять на:","a":"б","o":[{"l":"а","t":"только аварии и катастрофы"},{"l":"б","t":"происшествия, чрезвычайные происшествия, аварии, катастрофы и стихийные бедствия"},{"l":"в","t":"потенциальные и реальные"}]},{"p":1,"t":"fill","q":"______ — происшествие в технической системе, не сопровождающееся гибелью людей, при котором восстановление невозможно или экономически нецелесообразно.","a":"авария"},{"p":1,"t":"fill","q":"______ — происшествие в технической системе, сопровождающееся гибелью или пропажей без вести людей.","a":"катастрофа"},{"p":1,"t":"mc","q":"Стихийное бедствие — происшествие, связанное с:","a":"б","o":[{"l":"а","t":"ошибкой оператора"},{"l":"б","t":"стихийными явлениями на Земле, приведшее к разрушению биосферы и техносферы"},{"l":"в","t":"износом оборудования"}]},{"p":1,"t":"mc","q":"Чрезвычайная ситуация (ЧС) — это:","a":"а","o":[{"l":"а","t":"состояние объекта или территории после ЧП с угрозой жизни, материальным ущербом и деградацией природной среды"},{"l":"б","t":"плановый ремонт оборудования"},{"l":"в","t":"учебная тревога"}]},{"p":1,"t":"fill","q":"______ — это частота реализации опасности.","a":"риск"},{"p":1,"t":"fill","q":"В формуле R = n / N величина n — число тех или иных неблагоприятных ______.","a":"последствий"},{"p":1,"t":"mc","q":"В формуле R = n / N величина N означает:","a":"а","o":[{"l":"а","t":"возможное число неблагоприятных последствий за определённый период"},{"l":"б","t":"число неблагоприятных последствий"},{"l":"в","t":"ущерб от события"}]},{"p":1,"t":"mc","q":"В формуле R = P(A)·U величина U — это:","a":"в","o":[{"l":"а","t":"вероятность нежелательного события"},{"l":"б","t":"число последствий"},{"l":"в","t":"ущерб от него"}]},{"p":1,"t":"fill","q":"______ риск характеризует опасность определённого вида для отдельного индивидуума.","a":"индивидуальный"},{"p":1,"t":"mc","q":"Социальный (групповой) риск — это риск:","a":"б","o":[{"l":"а","t":"для отдельного человека"},{"l":"б","t":"для группы людей"},{"l":"в","t":"для технических средств"}]},{"p":1,"t":"fill","q":"Концепция ______ (допустимого) риска — это стремление к такой малой опасности, которую приемлет общество в данный период времени.","a":"приемлемого"},{"p":1,"t":"mc","q":"Приемлемый риск сочетает в себе аспекты:","a":"а","o":[{"l":"а","t":"технические, экономические, социальные и политические"},{"l":"б","t":"только технические"},{"l":"в","t":"только политические"}]},{"p":1,"t":"mc","q":"Традиционная концепция абсолютной безопасности признана:","a":"в","o":[{"l":"а","t":"единственно верной"},{"l":"б","t":"полностью соответствующей практике"},{"l":"в","t":"неадекватной законам техносферы"}]},{"p":1,"t":"fill","q":"Максимально приемлемым уровнем индивидуального риска гибели обычно считается ______ в год.","a":"10⁻⁶"},{"p":1,"t":"fill","q":"Неприемлемый риск имеет вероятность реализации более ______.","a":"10⁻³"},{"p":1,"t":"mc","q":"Переходная область значений риска находится в пределах:","a":"б","o":[{"l":"а","t":"от 10⁻⁶ до 10⁻⁹"},{"l":"б","t":"от 10⁻³ до 10⁻⁶"},{"l":"в","t":"выше 10⁻³"}]},{"p":1,"t":"fill","q":"1-й диапазон (R ≤ 10⁻⁶) называется ______ малый.","a":"пренебрежимо"},{"p":1,"t":"fill","q":"2-й диапазон (10⁻⁶ < R < 10⁻⁴) называется ______ допустимый.","a":"предельно"},{"p":1,"t":"mc","q":"3-й диапазон риска (10⁻⁴ < R < 10⁻³):","a":"а","o":[{"l":"а","t":"приемлемый для профессиональных групп и неприемлемый для населения"},{"l":"б","t":"пренебрежимо малый"},{"l":"в","t":"неприемлемый для всех"}]},{"p":1,"t":"mc","q":"4-й диапазон (R ≥ 10⁻³):","a":"в","o":[{"l":"а","t":"предельно допустимый"},{"l":"б","t":"приемлемый для населения"},{"l":"в","t":"неприемлемый для населения и для профессиональных групп"}]},{"p":1,"t":"fill","q":"______ — это идея, мысль, основное положение.","a":"принцип"},{"p":1,"t":"fill","q":"______ — это путь, способ достижения цели, исходящий из знания наиболее общих закономерностей.","a":"метод"},{"p":1,"t":"fill","q":"Принципы гуманизации деятельности, классификации, системности, снижения опасности относятся к ______ принципам.","a":"ориентирующим"},{"p":1,"t":"fill","q":"Принципы блокировки, герметизации, защиты расстоянием, экранирования относятся к ______ принципам.","a":"техническим"},{"p":1,"t":"mc","q":"Принцип защиты временем, информации, нормирования, подбора кадров, эргономичности относится к:","a":"в","o":[{"l":"а","t":"техническим"},{"l":"б","t":"ориентирующим"},{"l":"в","t":"организационным"}]},{"p":1,"t":"mc","q":"Принцип обратной связи, ответственности, плановости, стимулирования относится к:","a":"б","o":[{"l":"а","t":"техническим"},{"l":"б","t":"управленческим"},{"l":"в","t":"ориентирующим"}]},{"p":1,"t":"fill","q":"______ — пространство (рабочая зона), где находится человек в процессе деятельности.","a":"гомосфера"},{"p":1,"t":"fill","q":"______ — пространство, в котором постоянно существуют или периодически возникают опасности.","a":"ноксосфера"},{"p":1,"t":"mc","q":"Совмещение гомосферы и ноксосферы с позиций безопасности:","a":"б","o":[{"l":"а","t":"допустимо"},{"l":"б","t":"недопустимо"},{"l":"в","t":"желательно"}]},{"p":1,"t":"mc","q":"Сколько основных методов обеспечения безопасности выделяют?","a":"а","o":[{"l":"а","t":"три (А, Б, В)"},{"l":"б","t":"два"},{"l":"в","t":"пять"}]},{"p":1,"t":"fill","q":"Метод ______ состоит в пространственном и (или) временном разделении гомосферы и ноксосферы.","a":"А"},{"p":1,"t":"fill","q":"Метод ______ состоит в нормализации ноксосферы путём исключения опасностей (средства коллективной защиты).","a":"Б"},{"p":1,"t":"mc","q":"Метод В направлен на:","a":"а","o":[{"l":"а","t":"адаптацию человека к среде и повышение его защищённости"},{"l":"б","t":"разделение гомосферы и ноксосферы"},{"l":"в","t":"нормализацию ноксосферы"}]},{"p":1,"t":"mc","q":"Метод А реализуется через:","a":"в","o":[{"l":"а","t":"средства коллективной защиты"},{"l":"б","t":"профотбор и обучение"},{"l":"в","t":"дистанционное управление, автоматизацию, роботизацию"}]},{"p":1,"t":"fill","q":"Учебное пособие по БЖД издано под редакцией доктора технических наук, профессора ______.","a":"А.И. Сидорова"},{"p":1,"t":"fill","q":"Учебное пособие по БЖД издано в издательстве ______.","a":"КНОРУС"},{"p":1,"t":"mc","q":"В каком году издано учебное пособие?","a":"б","o":[{"l":"а","t":"2005"},{"l":"б","t":"2017"},{"l":"в","t":"2021"}]},{"p":2,"t":"fill","q":"Тема — классификация ______ факторов производственной среды и условий трудовой деятельности.","a":"негативных"},{"p":2,"t":"mc","q":"Что изучается в данной теме?","a":"в","o":[{"l":"а","t":"финансовая отчётность предприятия"},{"l":"б","t":"правила дорожного движения"},{"l":"в","t":"негативные факторы производственной среды и условий трудовой деятельности"}]},{"p":2,"t":"fill","q":"______ фактор рабочей среды — фактор, который может быть причиной острого заболевания, внезапного резкого ухудшения здоровья или смерти.","a":"опасный"},{"p":2,"t":"fill","q":"______ фактор рабочей среды — фактор, воздействие которого может вызвать профессиональное заболевание, нарушение здоровья или повреждение здоровья потомства.","a":"вредный"},{"p":2,"t":"mc","q":"Условия труда — это:","a":"а","o":[{"l":"а","t":"совокупность факторов производственной среды и трудового процесса, влияющих на здоровье и работоспособность человека"},{"l":"б","t":"только температура воздуха на рабочем месте"},{"l":"в","t":"режим работы предприятия"}]},{"p":2,"t":"fill","q":"Производственный шум, вибрация, освещение и аэроионы относятся к ______ факторам.","a":"физическим"},{"p":2,"t":"fill","q":"Электрически заряженные частицы воздуха — это ______.","a":"аэроионы"},{"p":2,"t":"mc","q":"К химическим факторам относятся:","a":"б","o":[{"l":"а","t":"шум и вибрация"},{"l":"б","t":"химические вещества и смеси, в т.ч. некоторые вещества биологической природы"},{"l":"в","t":"патогенные микроорганизмы"}]},{"p":2,"t":"fill","q":"Патогенные микроорганизмы — возбудители инфекционных заболеваний — относятся к ______ факторам.","a":"биологическим"},{"p":2,"t":"mc","q":"Факторы трудового процесса — это:","a":"в","o":[{"l":"а","t":"шум и вибрация"},{"l":"б","t":"химические вещества"},{"l":"в","t":"тяжесть и напряжённость труда"}]},{"p":2,"t":"fill","q":"______ труда отражает преимущественную нагрузку на опорно-двигательный аппарат и функциональные системы организма.","a":"тяжесть"},{"p":2,"t":"fill","q":"Один из показателей тяжести труда — характер рабочей ______.","a":"позы"},{"p":2,"t":"mc","q":"Что из перечисленного является показателем тяжести труда?","a":"б","o":[{"l":"а","t":"интеллектуальные нагрузки"},{"l":"б","t":"масса поднимаемого и перемещаемого груза"},{"l":"в","t":"эмоциональные нагрузки"}]},{"p":2,"t":"mc","q":"Что из перечисленного НЕ является показателем тяжести труда?","a":"а","o":[{"l":"а","t":"сенсорные нагрузки"},{"l":"б","t":"масса поднимаемого груза"},{"l":"в","t":"глубина и частота наклона корпуса"}]},{"p":2,"t":"fill","q":"______ труда отражает нагрузку преимущественно на центральную нервную систему, органы чувств и эмоциональную сферу работника.","a":"напряжённость"},{"p":2,"t":"fill","q":"Один из показателей напряжённости труда — степень ______ нагрузок.","a":"монотонности"},{"p":2,"t":"mc","q":"К показателям напряжённости труда относятся:","a":"в","o":[{"l":"а","t":"масса поднимаемого груза"},{"l":"б","t":"характер рабочей позы"},{"l":"в","t":"сенсорные и эмоциональные нагрузки"}]},{"p":2,"t":"fill","q":"Гигиенические нормативы условий труда — это уровни вредных факторов, обозначаемые ______ и ПДУ.","a":"ПДК"},{"p":2,"t":"mc","q":"Гигиенические нормативы установлены из расчёта работы:","a":"б","o":[{"l":"а","t":"12 ч в день"},{"l":"б","t":"8 ч в день, но не более 40 ч в неделю"},{"l":"в","t":"круглосуточно"}]},{"p":2,"t":"mc","q":"Соблюдение гигиенических нормативов:","a":"а","o":[{"l":"а","t":"не исключает нарушение здоровья у лиц с повышенной чувствительностью"},{"l":"б","t":"гарантирует полное отсутствие любых нарушений здоровья"},{"l":"в","t":"не имеет отношения к здоровью"}]},{"p":2,"t":"fill","q":"______ класс условий труда — условия, при которых сохраняется здоровье работника и создаются предпосылки для поддержания высокого уровня работоспособности.","a":"1-й (оптимальные)"},{"p":2,"t":"fill","q":"2 класс условий труда называется ______.","a":"допустимые"},{"p":2,"t":"mc","q":"Для какого класса установлены оптимальные нормативы только по микроклимату и факторам трудовой нагрузки?","a":"а","o":[{"l":"а","t":"1 класс"},{"l":"б","t":"2 класс"},{"l":"в","t":"3 класс"}]},{"p":2,"t":"mc","q":"Для 2 класса (допустимые условия) характерно:","a":"в","o":[{"l":"а","t":"уровни факторов превышают нормативы"},{"l":"б","t":"существует угроза для жизни"},{"l":"в","t":"уровни факторов не превышают нормативов, а изменения состояния организма восстанавливаются к началу следующей смены"}]},{"p":2,"t":"fill","q":"Условия труда 3 класса называются ______.","a":"вредными"},{"p":2,"t":"fill","q":"Подкласс 3.1 вызывает ______ функциональные изменения организма.","a":"обратимые"},{"p":2,"t":"fill","q":"Подкласс 3.2 приводит к ______ функциональным изменениям и росту заболеваемости.","a":"стойким"},{"p":2,"t":"mc","q":"Условия труда 3 класса (вредные) характеризуются тем, что уровни вредных факторов:","a":"б","o":[{"l":"а","t":"не превышают установленных гигиенических нормативов"},{"l":"б","t":"превышают гигиенические нормативы и неблагоприятно действуют на организм работника и/или его потомство"},{"l":"в","t":"полностью отсутствуют на рабочем месте"}]},{"p":2,"t":"fill","q":"Подкласс 3.3 приводит к развитию профессиональных болезней ______ и средней степени тяжести.","a":"лёгкой"},{"p":2,"t":"fill","q":"Подкласс 3.4 приводит к возникновению ______ форм профессиональных заболеваний.","a":"тяжёлых"},{"p":2,"t":"mc","q":"Подкласс 3.4 приводит к:","a":"в","o":[{"l":"а","t":"обратимым изменениям"},{"l":"б","t":"полному сохранению здоровья"},{"l":"в","t":"тяжёлым формам профессиональных заболеваний со значительным ростом хронических заболеваний"}]},{"p":2,"t":"fill","q":"При подклассе 3.1 функциональные изменения восстанавливаются, как правило, при более ______ прерывании контакта с вредными факторами.","a":"длительном"},{"p":2,"t":"mc","q":"Для подкласса 3.1 характерно:","a":"а","o":[{"l":"а","t":"обратимые функциональные изменения и рост риска повреждения здоровья"},{"l":"б","t":"стойкие функциональные изменения"},{"l":"в","t":"тяжёлые формы заболеваний"}]},{"p":2,"t":"fill","q":"При подклассе 3.2 возникают ______ функциональные изменения.","a":"стойкие"},{"p":2,"t":"mc","q":"Начальные признаки или лёгкие формы профессиональных заболеваний при 3.2 возникают после продолжительной экспозиции, часто после:","a":"в","o":[{"l":"а","t":"5 лет"},{"l":"б","t":"1 года"},{"l":"в","t":"15 и более лет"}]},{"p":2,"t":"mc","q":"Профессиональные заболевания при подклассе 3.2 возникают:","a":"б","o":[{"l":"а","t":"с потерей профессиональной трудоспособности"},{"l":"б","t":"без потери профессиональной трудоспособности"},{"l":"в","t":"только у потомства"}]},{"p":2,"t":"fill","q":"4 класс условий труда называется ______ (экстремальные).","a":"опасные"},{"p":2,"t":"mc","q":"4 класс характеризуется:","a":"в","o":[{"l":"а","t":"полным сохранением здоровья"},{"l":"б","t":"отсутствием вредных факторов"},{"l":"в","t":"угрозой для жизни и высоким риском острых профессиональных поражений"}]},{"p":2,"t":"mc","q":"Профессиональные болезни при подклассе 3.3 развиваются:","a":"б","o":[{"l":"а","t":"без потери трудоспособности"},{"l":"б","t":"с потерей профессиональной трудоспособности"},{"l":"в","t":"только в лёгкой форме без последствий"}]},{"p":2,"t":"mc","q":"Тяжёлые формы профессиональных заболеваний при подклассе 3.4 возникают:","a":"а","o":[{"l":"а","t":"с потерей общей трудоспособности"},{"l":"б","t":"без потери трудоспособности"},{"l":"в","t":"только у лиц старше 60 лет"}]},{"p":3,"t":"fill","q":"Тема — микроклимат ______ помещений.","a":"производственных"},{"p":3,"t":"mc","q":"Какой вопрос НЕ рассматривается в теме?","a":"г","o":[{"l":"а","t":"показатели микроклимата и их влияние на организм"},{"l":"б","t":"гигиеническое нормирование микроклимата"},{"l":"в","t":"мероприятия по нормализации микроклимата"},{"l":"г","t":"расчёт заработной платы"}]},{"p":3,"t":"fill","q":"Микроклимат производственных помещений — метеорологические условия внутренней среды, определяемые сочетаниями температуры, влажности, скорости движения воздуха и ______ облучения.","a":"теплового"},{"p":3,"t":"fill","q":"______ — участок помещения, на котором в течение рабочей смены или её части осуществляется трудовая деятельность.","a":"рабочее место"},{"p":3,"t":"mc","q":"Рабочая зона при выполнении работы стоя — пространство над уровнем пола высотой:","a":"а","o":[{"l":"а","t":"2 м"},{"l":"б","t":"1,5 м"},{"l":"в","t":"3 м"}]},{"p":3,"t":"mc","q":"Рабочая зона при выполнении работы сидя — пространство над уровнем пола высотой:","a":"в","o":[{"l":"а","t":"1,0 м"},{"l":"б","t":"2,0 м"},{"l":"в","t":"1,5 м"}]},{"p":3,"t":"mc","q":"Производственные помещения — это:","a":"б","o":[{"l":"а","t":"открытые площадки без построек"},{"l":"б","t":"замкнутые пространства в специально предназначенных зданиях и сооружениях, где осуществляется трудовая деятельность"},{"l":"в","t":"любые помещения, включая жилые"}]},{"p":3,"t":"fill","q":"Относительная влажность воздуха измеряется в ______.","a":"процентах (%)"},{"p":3,"t":"fill","q":"Интенсивность теплового облучения измеряется в ______.","a":"Вт/м²"},{"p":3,"t":"mc","q":"Какой показатель НЕ относится к показателям микроклимата?","a":"а","o":[{"l":"а","t":"производственный шум"},{"l":"б","t":"температура поверхностей"},{"l":"в","t":"относительная влажность воздуха"}]},{"p":3,"t":"mc","q":"В каких единицах измеряется скорость движения воздуха?","a":"в","o":[{"l":"а","t":"Па"},{"l":"б","t":"кг/м³"},{"l":"в","t":"м/с"}]},{"p":3,"t":"mc","q":"Показатели микроклимата должны обеспечивать сохранение:","a":"б","o":[{"l":"а","t":"баланса предприятия"},{"l":"б","t":"теплового баланса человека с окружающей средой"},{"l":"в","t":"уровня шума"}]},{"p":3,"t":"fill","q":"______ — способность человека поддерживать температуру мозга и внутренних органов в определённых границах.","a":"терморегуляция"},{"p":3,"t":"mc","q":"В каких пределах температуры тела человек сохраняет жизнеспособность?","a":"б","o":[{"l":"а","t":"20–30 °С"},{"l":"б","t":"25–43 °С"},{"l":"в","t":"36–37 °С"}]},{"p":3,"t":"fill","q":"При высокой температуре окружающей среды теплоотдача затрудняется и наступает ______ организма.","a":"перегрев"},{"p":3,"t":"fill","q":"В физиологическую фазу перегрева наблюдается обильное ______.","a":"потовыделение"},{"p":3,"t":"mc","q":"Повышение температуры тела до 39–40 °С с обмороком и рвотой соответствует тепловому удару:","a":"а","o":[{"l":"а","t":"средней формы"},{"l":"б","t":"лёгкой формы"},{"l":"в","t":"тяжёлой формы"}]},{"p":3,"t":"mc","q":"Повышение температуры тела до 41–42 °С с потерей сознания и судорогами соответствует тепловому удару:","a":"в","o":[{"l":"а","t":"лёгкой формы"},{"l":"б","t":"средней формы"},{"l":"в","t":"тяжёлой формы"}]},{"p":3,"t":"fill","q":"Охлаждение конечностей, ушей, носа — это ______ переохлаждение.","a":"местное"},{"p":3,"t":"mc","q":"Общее переохлаждение проявляется:","a":"б","o":[{"l":"а","t":"охлаждением конечностей"},{"l":"б","t":"ощущением холода и побледнением кожного покрова"},{"l":"в","t":"повышением температуры тела"}]},{"p":3,"t":"fill","q":"Относительная влажность показывает отношение давления водяных паров к давлению ______ паров.","a":"насыщенных"},{"p":3,"t":"mc","q":"Относительная влажность воздуха — это:","a":"а","o":[{"l":"а","t":"процентное отношение количества водяных паров в воздухе к максимально возможному при данной температуре"},{"l":"б","t":"масса пыли в единице объёма воздуха"},{"l":"в","t":"скорость движения воздуха в помещении"}]},{"p":3,"t":"mc","q":"Величина РS в формуле относительной влажности — это:","a":"в","o":[{"l":"а","t":"давление водяных паров, содержащихся в воздухе"},{"l":"б","t":"атмосферное давление на уровне моря"},{"l":"в","t":"давление насыщенных паров, зависящее от температуры и давления воздуха"}]},{"p":3,"t":"fill","q":"При низкой температуре воздуха большая скорость его движения оказывает ______ действие на организм.","a":"охлаждающее"},{"p":3,"t":"mc","q":"Инфракрасные лучи оказывают на организм в основном:","a":"в","o":[{"l":"а","t":"химическое воздействие"},{"l":"б","t":"электрическое воздействие"},{"l":"в","t":"тепловое воздействие"}]},{"p":3,"t":"mc","q":"В результате теплового воздействия инфракрасных лучей в организме:","a":"б","o":[{"l":"а","t":"повышается мышечная сила"},{"l":"б","t":"уменьшается кислородная насыщенность крови, понижается венозное давление, замедляется кровоток"},{"l":"в","t":"ничего не меняется"}]},{"p":3,"t":"fill","q":"Интенсивность теплового облучения — мощность лучистого потока, приходящегося на единицу ______ площади.","a":"облучаемой"},{"p":3,"t":"fill","q":"Длинноволновые инфракрасные лучи имеют длину волны более ______ мкм.","a":"1,5"},{"p":3,"t":"mc","q":"Коротковолновые ИК-лучи (0,76–1,5 мкм):","a":"б","o":[{"l":"а","t":"поглощаются в эпидермисе кожи"},{"l":"б","t":"глубоко проникают в ткани и разогревают их"},{"l":"в","t":"не проникают в ткани"}]},{"p":3,"t":"mc","q":"Длинноволновые ИК-лучи могут вызвать:","a":"а","o":[{"l":"а","t":"ожог кожи и глаз, катаракту глаз"},{"l":"б","t":"только переохлаждение"},{"l":"в","t":"улучшение зрения"}]},{"p":3,"t":"fill","q":"Микроклимат нормируется с учётом интенсивности энергозатрат, времени выполнения работы и ______ года.","a":"периода"},{"p":3,"t":"mc","q":"Что учитывается при нормировании микроклимата?","a":"в","o":[{"l":"а","t":"только температура воздуха"},{"l":"б","t":"только влажность"},{"l":"в","t":"интенсивность энергозатрат, время работы, период года"}]},{"p":3,"t":"fill","q":"Лёгкие физические работы (категория I) — виды деятельности с расходом энергии не более ______ ккал.","a":"150"},{"p":3,"t":"fill","q":"Категория IIб — работы с переноской тяжестей до ______ кг.","a":"10"},{"p":3,"t":"mc","q":"К категории Iа относятся работы:","a":"в","o":[{"l":"а","t":"связанные с переноской тяжестей свыше 10 кг"},{"l":"б","t":"требующие больших физических усилий"},{"l":"в","t":"производимые сидя с незначительным физическим напряжением"}]},{"p":3,"t":"mc","q":"К категории III (тяжёлые работы) относятся работы, связанные с переноской тяжестей:","a":"б","o":[{"l":"а","t":"до 1 кг"},{"l":"б","t":"свыше 10 кг"},{"l":"в","t":"до 10 кг"}]},{"p":3,"t":"mc","q":"Работы категории II характеризуются:","a":"а","o":[{"l":"а","t":"постоянной ходьбой и перемещением мелких (до 1 кг) изделий"},{"l":"б","t":"работой только сидя"},{"l":"в","t":"переноской тяжестей свыше 10 кг"}]},{"p":3,"t":"fill","q":"Холодный период года — период со среднесуточной температурой наружного воздуха +10 °С и ______.","a":"ниже"},{"p":3,"t":"mc","q":"Тёплый период года характеризуется среднесуточной температурой наружного воздуха:","a":"б","o":[{"l":"а","t":"ниже +10 °С"},{"l":"б","t":"выше +10 °С"},{"l":"в","t":"ровно 0 °С"}]},{"p":3,"t":"mc","q":"Среднесуточная температура наружного воздуха — это:","a":"а","o":[{"l":"а","t":"средняя величина температуры, измеренная в определённые часы суток через одинаковые интервалы"},{"l":"б","t":"максимальная температура за месяц"},{"l":"в","t":"температура в полдень"}]},{"p":3,"t":"fill","q":"______ величины показателей микроклимата необходимо соблюдать на рабочих местах операторского типа.","a":"оптимальные"},{"p":3,"t":"mc","q":"Допустимые величины устанавливаются, когда:","a":"а","o":[{"l":"а","t":"невозможно обеспечить оптимальные по техническим и экономическим причинам"},{"l":"б","t":"всегда"},{"l":"в","t":"никогда"}]},{"p":3,"t":"mc","q":"Оптимальные величины обязательно соблюдают на рабочих местах:","a":"в","o":[{"l":"а","t":"только на улице"},{"l":"б","t":"только в бытовых помещениях"},{"l":"в","t":"операторского типа, связанных с нервно-эмоциональным напряжением"}]},{"p":3,"t":"fill","q":"Для оценки нагревающего микроклимата используется интегральный показатель ______-индекс.","a":"ТНС (WBGT)"},{"p":3,"t":"fill","q":"Международный стандарт, по которому определяют WBGT-индекс, — ISO ______.","a":"43"},{"p":3,"t":"mc","q":"Формула ТНС-индекса:","a":"в","o":[{"l":"а","t":"tвл + tш"},{"l":"б","t":"0,5·tвл + 0,5·tш"},{"l":"в","t":"0,7·tвл + 0,3·tш"}]},{"p":3,"t":"mc","q":"Величина tвл в формуле ТНС-индекса — это:","a":"б","o":[{"l":"а","t":"температура шарового термометра"},{"l":"б","t":"температура смоченного термометра аспирационного психрометра"},{"l":"в","t":"температура воздуха в помещении"}]},{"p":3,"t":"fill","q":"Контроль параметров микроклимата проводится не менее ______ раз в смену.","a":"3"},{"p":3,"t":"fill","q":"В холодный период года контроль проводят в дни, когда температура наружного воздуха отличается от средней наиболее холодного месяца не более чем на ______ °С.","a":"5"},{"p":3,"t":"mc","q":"При работе стоя температуру и скорость движения воздуха измеряют на высоте:","a":"б","o":[{"l":"а","t":"0,1 и 1,0 м"},{"l":"б","t":"0,1 и 1,5 м"},{"l":"в","t":"0,5 и 2 м"}]},{"p":3,"t":"mc","q":"При работе сидя температуру и скорость движения воздуха измеряют на высоте:","a":"а","o":[{"l":"а","t":"0,1 и 1,0 м"},{"l":"б","t":"0,1 и 1,5 м"},{"l":"в","t":"0,5 и 2 м"}]},{"p":3,"t":"fill","q":"Скорость движения воздуха измеряют кататермометром и ______ (крыльчатым и чашечным).","a":"анемометром"},{"p":3,"t":"fill","q":"Относительную влажность воздуха измеряют психрометрами и ______.","a":"гигрографами"},{"p":3,"t":"mc","q":"Для определения ТНС-индекса используют:","a":"б","o":[{"l":"а","t":"только ртутный термометр"},{"l":"б","t":"шаровый термометр и аспирационный психрометр"},{"l":"в","t":"радиометр и актинометр"}]},{"p":3,"t":"mc","q":"Интенсивность теплового облучения измеряют:","a":"а","o":[{"l":"а","t":"радиометром и актинометром"},{"l":"б","t":"анемометром"},{"l":"в","t":"психрометром"}]},{"p":3,"t":"mc","q":"Прибор, измеряющий сразу температуру, влажность и скорость движения воздуха, называется:","a":"в","o":[{"l":"а","t":"кататермометр"},{"l":"б","t":"актинометр"},{"l":"в","t":"метеометр"}]},{"p":3,"t":"fill","q":"______ поверхностей источников излучения снижает температуру излучающей поверхности и уменьшает тепловыделение.","a":"теплоизоляция"},{"p":3,"t":"mc","q":"Теплозащитные экраны бывают:","a":"а","o":[{"l":"а","t":"непрозрачные, полупрозрачные, прозрачные"},{"l":"б","t":"только металлические"},{"l":"в","t":"только тканевые"}]},{"p":3,"t":"mc","q":"Теплоизоляция по виду выполнения бывает:","a":"в","o":[{"l":"а","t":"только оберточной"},{"l":"б","t":"только жидкой"},{"l":"в","t":"мастичной, оберточной, засыпной, из скорлупы и смешанной"}]},{"p":3,"t":"fill","q":"______ — подача воздуха в виде воздушной струи, направленной на рабочее место.","a":"воздушное душирование"},{"p":3,"t":"mc","q":"Воздушные завесы предназначены для:","a":"в","o":[{"l":"а","t":"охлаждения деталей"},{"l":"б","t":"очистки воды"},{"l":"в","t":"защиты от прорыва холодного воздуха через проёмы здания"}]},{"p":3,"t":"mc","q":"Воздушные оазисы предназначены для:","a":"б","o":[{"l":"а","t":"обогрева всего цеха"},{"l":"б","t":"улучшения метеорологических условий труда, как правило, для отдыха на ограниченной площади"},{"l":"в","t":"очистки воздуха от пыли"}]},{"p":3,"t":"fill","q":"Для работы в условиях холода применяют утеплённую одежду — костюм ______.","a":"«СЕВЕР»"},{"p":3,"t":"mc","q":"Костюм «СЕВЕР» относится к:","a":"а","o":[{"l":"а","t":"утеплённой одежде"},{"l":"б","t":"летней спецодежде"},{"l":"в","t":"защитным очкам"}]},{"p":3,"t":"fill","q":"Костюм спасателя ______ — разновидность СИЗ от инфракрасного излучения.","a":"МЧС"},{"p":3,"t":"fill","q":"Костюм жаростойкий изготавливают из хлопчатобумажной ткани с огнезащитной ______.","a":"пропиткой"},{"p":3,"t":"mc","q":"Какие СИЗ применяют от инфракрасного излучения?","a":"б","o":[{"l":"а","t":"наушники"},{"l":"б","t":"теплоотражательные костюмы"},{"l":"в","t":"респираторы"}]},{"p":3,"t":"fill","q":"Мероприятие по нормализации — подбор рационального режима труда и ______.","a":"отдыха"},{"p":3,"t":"mc","q":"Что относится к мероприятиям по защите от неблагоприятного микроклимата?","a":"а","o":[{"l":"а","t":"уменьшение стажа работы в неблагоприятных условиях"},{"l":"б","t":"увеличение рабочего дня"},{"l":"в","t":"отказ от средств защиты"}]},{"p":3,"t":"mc","q":"Какое мероприятие по защите от неблагоприятного микроклимата названо в теме?","a":"в","o":[{"l":"а","t":"сокращение перерывов"},{"l":"б","t":"запрет на спецодежду"},{"l":"в","t":"увеличение продолжительности отпуска"}]},{"p":4,"t":"fill","q":"Тема — вредные вещества, пыль, ______, вентиляция.","a":"СИЗ"},{"p":4,"t":"mc","q":"Что изучается в теме?","a":"б","o":[{"l":"а","t":"устройство компьютера"},{"l":"б","t":"вредные вещества, пыль, СИЗ и вентиляция"},{"l":"в","t":"правила этикета"}]},{"p":4,"t":"fill","q":"Действие ядовитых веществ может проявляться в острых и ______ отравлениях.","a":"хронических"},{"p":4,"t":"mc","q":"Хроническое отравление развивается при:","a":"а","o":[{"l":"а","t":"длительном повторяющемся воздействии малых доз"},{"l":"б","t":"однократном воздействии большой дозы"},{"l":"в","t":"полном отсутствии контакта с веществом"}]},{"p":4,"t":"mc","q":"Действие одного и того же яда при хроническом и остром отравлениях:","a":"в","o":[{"l":"а","t":"одинаково"},{"l":"б","t":"не проявляется"},{"l":"в","t":"различно"}]},{"p":4,"t":"fill","q":"К 1-му классу (чрезвычайно опасные) относятся озон, ______ и свинец.","a":"ртуть"},{"p":4,"t":"fill","q":"Сероводород и хлор относятся к ______ классу (высокоопасные).","a":"2-му"},{"p":4,"t":"mc","q":"К какому классу опасности относится аммиак?","a":"в","o":[{"l":"а","t":"1-й"},{"l":"б","t":"2-й"},{"l":"в","t":"4-й"}]},{"p":4,"t":"mc","q":"К 4-му классу (малоопасные) относятся:","a":"б","o":[{"l":"а","t":"озон, ртуть, свинец"},{"l":"б","t":"аммиак, бензин, керосин"},{"l":"в","t":"марганец, серная кислота"}]},{"p":4,"t":"fill","q":"Вещества, вызывающие аллергические заболевания, называются ______.","a":"сенсибилизирующими"},{"p":4,"t":"fill","q":"Вещества, которые, попадая в организм в небольших количествах, вступают во взаимодействие с тканями, называются ______.","a":"токсическими (ядами)"},{"p":4,"t":"mc","q":"Раздражающие вещества — это вещества, которые:","a":"а","o":[{"l":"а","t":"раздражают слизистые оболочки и кожу (бром, хлор, фтор, аммиак, кислоты, щёлочи)"},{"l":"б","t":"вызывают аллергию"},{"l":"в","t":"не оказывают никакого действия"}]},{"p":4,"t":"fill","q":"Один из путей проникновения вредных веществ в организм — через органы ______.","a":"дыхания"},{"p":4,"t":"mc","q":"Вредные вещества могут проникать в организм:","a":"б","o":[{"l":"а","t":"только через кожу"},{"l":"б","t":"через органы дыхания, желудочно-кишечный тракт, кожные покровы и слизистые"},{"l":"в","t":"только через ЖКТ"}]},{"p":4,"t":"fill","q":"Аэрозоли преимущественно фиброгенного действия обозначаются ______.","a":"АПФД"},{"p":4,"t":"fill","q":"Скопление осевшей пыли называется ______.","a":"аэрогели"},{"p":4,"t":"mc","q":"Опасность пыли тем больше, чем:","a":"б","o":[{"l":"а","t":"крупнее пылинки"},{"l":"б","t":"меньше размер пылинок"},{"l":"в","t":"больше масса пыли на полу"}]},{"p":4,"t":"mc","q":"Наиболее опасна в строительстве очень мелкая (тонкодисперсная) пыль с размером частиц:","a":"а","o":[{"l":"а","t":"менее 5 мкм"},{"l":"б","t":"более 50 мкм"},{"l":"в","t":"100 мкм и более"}]},{"p":4,"t":"mc","q":"Наиболее опасная минеральная пыль в строительстве — это:","a":"в","o":[{"l":"а","t":"древесная"},{"l":"б","t":"бумажная"},{"l":"в","t":"силикатная и песчаная (при работе с цементом и известью)"}]},{"p":4,"t":"fill","q":"Заболевание лёгких, вызываемое длительным вдыханием пыли, называется ______.","a":"силикоз"},{"p":4,"t":"mc","q":"На схеме лёгких показано сравнение состояния «В норме» и «При ______».","a":"в","o":[{"l":"а","t":"гриппе"},{"l":"б","t":"переломе"},{"l":"в","t":"ХОБЛ"}]},{"p":4,"t":"fill","q":"ПДКмр — концентрация вредного вещества при операциях с максимальным выделением его в воздух ______ зоны.","a":"рабочей"},{"p":4,"t":"fill","q":"ПДКсс — средняя из концентраций, выявленных в течение суток, или отбираемая непрерывно в течение ______ ч.","a":"24"},{"p":4,"t":"mc","q":"ПДКсс установлена для предупреждения:","a":"а","o":[{"l":"а","t":"общетоксического, канцерогенного, мутагенного и другого влияния на организм"},{"l":"б","t":"только острого действия"},{"l":"в","t":"только взрыва"}]},{"p":4,"t":"fill","q":"______ действие — суммарный эффект смеси, равный сумме эффектов действующих компонентов.","a":"аддитивное"},{"p":4,"t":"mc","q":"Независимое действие означает, что:","a":"б","o":[{"l":"а","t":"эффекты веществ всегда складываются"},{"l":"б","t":"достаточно, чтобы концентрации веществ не превышали ПДК"},{"l":"в","t":"вещества не действуют на организм"}]},{"p":4,"t":"fill","q":"Замена вредных веществ наименее вредными, сухих способов переработки пылящих материалов — ______.","a":"мокрыми"},{"p":4,"t":"fill","q":"Контроль за содержанием вредных веществ в воздухе рабочей зоны — одно из ______ по обеспечению безопасности.","a":"мероприятий"},{"p":4,"t":"mc","q":"Что относится к мероприятиям при контакте с вредными веществами?","a":"а","o":[{"l":"а","t":"применение средств индивидуальной защиты работающих"},{"l":"б","t":"увеличение концентрации вредных веществ"},{"l":"в","t":"отказ от вентиляции"}]},{"p":4,"t":"mc","q":"Какое мероприятие снижает контакт человека с вредными веществами?","a":"в","o":[{"l":"а","t":"увеличение числа ручных операций"},{"l":"б","t":"отказ от автоматического контроля"},{"l":"в","t":"замкнутый цикл, автоматизация, дистанционное управление"}]},{"p":4,"t":"fill","q":"Для измерения концентрации вредных веществ в воздухе применяют ______.","a":"газоанализатор"},{"p":4,"t":"fill","q":"В индикаторной трубке вредные вещества улавливает слой ______.","a":"сорбента"},{"p":4,"t":"mc","q":"Помимо сорбента, в индикаторной трубке предусмотрен:","a":"б","o":[{"l":"а","t":"магнит"},{"l":"б","t":"ватный тампон"},{"l":"в","t":"вентилятор"}]},{"p":4,"t":"fill","q":"______ СИЗОД изолируют органы дыхания от окружающей среды, а воздух поступает из источника дыхательной смеси.","a":"изолирующие"},{"p":4,"t":"fill","q":"Фильтрующие СИЗОД очищают вдыхаемый воздух с помощью фильтров, сорбентов и ______.","a":"поглотителей"},{"p":4,"t":"mc","q":"Фильтрующие СИЗОД применяют:","a":"а","o":[{"l":"а","t":"при известном составе и известной концентрации вредных веществ"},{"l":"б","t":"при недостатке кислорода во вдыхаемом воздухе"},{"l":"в","t":"при ликвидации аварии"}]},{"p":4,"t":"mc","q":"Изолирующие СИЗОД применяют:","a":"в","o":[{"l":"а","t":"только при известном составе воздуха"},{"l":"б","t":"только в быту"},{"l":"в","t":"при недостатке кислорода, высоких или неизвестных концентрациях, тяжёлой работе и в особо опасных условиях"}]},{"p":4,"t":"fill","q":"Организованная естественная вентиляция называется ______.","a":"аэрацией"},{"p":4,"t":"fill","q":"Неорганизованная естественная вентиляция — это ______ (поступление воздуха через неплотности).","a":"инфильтрация"},{"p":4,"t":"mc","q":"Естественная вентиляция создаётся:","a":"а","o":[{"l":"а","t":"без применения электрооборудования — за счёт разности температур, изменения давления и ветрового давления"},{"l":"б","t":"с помощью вентиляторов"},{"l":"в","t":"с помощью кондиционеров"}]},{"p":4,"t":"mc","q":"Недостаток естественной вентиляции:","a":"в","o":[{"l":"а","t":"высокая стоимость электроэнергии"},{"l":"б","t":"невозможность работы без вентиляторов"},{"l":"в","t":"сильная зависимость эффективности от внешних факторов (температуры, ветра, времени года)"}]},{"p":4,"t":"mc","q":"Что характерно для естественной вентиляции?","a":"а","o":[{"l":"а","t":"практически не осуществляются очистка, нагрев, сушка и увлажнение воздуха"},{"l":"б","t":"она полностью очищает воздух"},{"l":"в","t":"она не зависит от погоды"}]},{"p":4,"t":"fill","q":"При выделении вредностей обычно применяют ______ систему вентиляции (местную + общеобменную).","a":"комбинированную"},{"p":4,"t":"mc","q":"Местная вентиляция:","a":"в","o":[{"l":"а","t":"обслуживает весь объём помещения"},{"l":"б","t":"полностью заменяет все другие виды вентиляции"},{"l":"в","t":"требует меньших затрат и обслуживает локальные рабочие места"}]},{"p":4,"t":"mc","q":"Общеобменная вентиляция применяется для:","a":"б","o":[{"l":"а","t":"обслуживания одного рабочего места"},{"l":"б","t":"устранения вредностей во всём объёме помещения"},{"l":"в","t":"только для обогрева"}]},{"p":4,"t":"fill","q":"______ вентиляция удаляет из помещения загрязнённый или нагретый отработанный воздух.","a":"вытяжная"},{"p":4,"t":"mc","q":"Приточная вентиляция:","a":"б","o":[{"l":"а","t":"удаляет загрязнённый воздух"},{"l":"б","t":"подаёт свежий воздух в помещение"},{"l":"в","t":"не участвует в воздухообмене"}]},{"p":4,"t":"fill","q":"Местная ______ вентиляция подаёт воздух непосредственно на рабочее место для снижения температуры и концентрации вредных веществ.","a":"приточная"},{"p":4,"t":"mc","q":"Местный отсос должен располагаться:","a":"б","o":[{"l":"а","t":"как можно дальше от источника выделения"},{"l":"б","t":"максимально близко к источнику вредного выделения"},{"l":"в","t":"в любом месте помещения"}]},{"p":4,"t":"fill","q":"Удаляемый воздух не должен проходить через зону ______ рабочего.","a":"дыхания"},{"p":4,"t":"fill","q":"Местный отсос должен располагаться на линии ______ потока вредных выделений.","a":"распространения"},{"p":4,"t":"mc","q":"Какое требование предъявляется к местным отсосам?","a":"б","o":[{"l":"а","t":"отсос должен быть далеко от источника"},{"l":"б","t":"конструкция не должна мешать работе"},{"l":"в","t":"конструкция отсоса должна мешать работе"}]},{"p":4,"t":"mc","q":"Через местный отсос должно проходить:","a":"а","o":[{"l":"а","t":"максимальное улавливание вредностей при минимальном расходе воздуха"},{"l":"б","t":"минимальное улавливание при максимальном расходе воздуха"},{"l":"в","t":"воздух без ограничений"}]},{"p":4,"t":"mc","q":"Местная вентиляция не всегда достаточна, если вредные выделения:","a":"в","o":[{"l":"а","t":"выделяются в одной точке"},{"l":"б","t":"отсутствуют"},{"l":"в","t":"рассредоточены на значительной площади или в объёме помещения"}]}];
+
+
+/* ================= КОНТРОЛЬНАЯ РАБОТА ================= */
+const CTRL_PARTS = {
+  '1': {title:'Лекция 1. Наука БЖД', cls:'theme1'},
+  '2': {title:'Лекция 2. Классификация негативных факторов', cls:'theme2'},
+  '3': {title:'Лекция 3. Микроклимат', cls:'theme3'},
+  '4': {title:'Лекция 4. Вредные вещества, пыль, СИЗ, вентиляция', cls:'theme1'},
+  'all': {title:'Все лекции', cls:'theme1'}
+};
+
+const ctrlIntroEl = document.getElementById('ctrlIntro');
+const ctrlQuizEl = document.getElementById('ctrlQuiz');
+const ctrlEndEl = document.getElementById('ctrlEnd');
+const ctrlPartsEl = document.getElementById('ctrlParts');
+const ctrlPartNameEl = document.getElementById('ctrlPartName');
+const ctrlStartBtn = document.getElementById('ctrlStart');
+const ctrlProgressEl = document.getElementById('ctrlProgress');
+const ctrlBadgeEl = document.getElementById('ctrlBadge');
+const ctrlBarEl = document.getElementById('ctrlBar');
+const ctrlScoreEl = document.getElementById('ctrlScore');
+const ctrlQtextEl = document.getElementById('ctrlQtext');
+const ctrlQcardEl = document.getElementById('ctrlQcard');
+const ctrlOptionsEl = document.getElementById('ctrlOptions');
+const ctrlAnswerWrapEl = document.getElementById('ctrlAnswerWrap');
+const ctrlAnswerEl = document.getElementById('ctrlAnswer');
+const ctrlResultEl = document.getElementById('ctrlResult');
+const ctrlCheckBtn = document.getElementById('ctrlCheck');
+const ctrlNextBtn = document.getElementById('ctrlNext');
+const ctrlExitBtn = document.getElementById('ctrlExit');
+const ctrlFinalScoreEl = document.getElementById('ctrlFinalScore');
+const ctrlFinalSubEl = document.getElementById('ctrlFinalSub');
+const ctrlReviewEl = document.getElementById('ctrlReview');
+const ctrlRestartBtn = document.getElementById('ctrlRestart');
+const ctrlShuffleEl = document.getElementById('ctrlShuffle');
+const ctrlNavGridEl = document.getElementById('ctrlNavGrid');
+const ctrlFinishBtn = document.getElementById('ctrlFinish');
+
+let ctrlPart = '1';
+let ctrlTest = [];
+let ctrlState = [];
+let ctrlIdx = 0;
+let ctrlAnswered = false;
+
+function ctrlNorm(s){
+  return String(s).toLowerCase().replace(/ё/g,'е')
+    .replace(/[^a-zа-я0-9]+/gi,' ')
+    .replace(/\s+/g,' ').trim();
+}
+
+function ctrlAnswers(ans){
+  const list=[ans];
+  const noParen=String(ans).replace(/\([^)]*\)/g,' ');
+  if(ctrlNorm(noParen)!==ctrlNorm(ans)) list.push(noParen);
+  const uniq=[];
+  list.forEach(function(a){ const n=ctrlNorm(a); if(n && uniq.indexOf(n)<0) uniq.push(n); });
+  return uniq;
+}
+
+function ctrlShuffleArr(a){
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    const t=a[i]; a[i]=a[j]; a[j]=t;
+  }
+  return a;
+}
+
+function ctrlEsc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function ctrlMeta(q){ return CTRL_PARTS[String(q.p)] || CTRL_PARTS['1']; }
+
+function ctrlCorrectCount(){
+  let n=0;
+  ctrlState.forEach(function(s){ if(s && s.ok) n++; });
+  return n;
+}
+
+function ctrlAnsweredCount(){
+  let n=0;
+  ctrlState.forEach(function(s){ if(s) n++; });
+  return n;
+}
+
+function ctrlUpdatePartName(){
+  const m=CTRL_PARTS[ctrlPart] || CTRL_PARTS['1'];
+  const n=ctrlPart==='all' ? CONTROL_QUESTIONS.length : CONTROL_QUESTIONS.filter(function(x){return String(x.p)===ctrlPart;}).length;
+  ctrlPartNameEl.textContent=m.title+' · '+n+' вопросов';
+}
+
+function ctrlReset(){
+  ctrlIntroEl.classList.remove('hidden');
+  ctrlQuizEl.classList.add('hidden');
+  ctrlEndEl.classList.add('hidden');
+  ctrlUpdatePartName();
+}
+
+function ctrlSelectPart(btn){
+  ctrlPart=btn.dataset.part;
+  Array.prototype.forEach.call(ctrlPartsEl.children,function(b){ b.classList.remove('selected'); });
+  btn.classList.add('selected');
+  ctrlUpdatePartName();
+}
+
+function ctrlBuildNav(){
+  ctrlNavGridEl.innerHTML='';
+  ctrlTest.forEach(function(q,i){
+    const b=document.createElement('button');
+    b.type='button';
+    b.className='ctrl-nav-btn';
+    b.textContent=String(i+1);
+    b.setAttribute('aria-label','Вопрос '+(i+1));
+    b.addEventListener('click',function(){
+      ctrlShowQuestion(i);
+      if(ctrlQcardEl.scrollIntoView) ctrlQcardEl.scrollIntoView({block:'start'});
+    });
+    ctrlNavGridEl.appendChild(b);
+  });
+}
+
+function ctrlUpdateNav(){
+  Array.prototype.forEach.call(ctrlNavGridEl.children,function(b,i){
+    let cls='ctrl-nav-btn';
+    if(i===ctrlIdx) cls+=' current';
+    if(ctrlState[i]) cls+=(ctrlState[i].ok?' ok':' bad');
+    b.className=cls;
+  });
+  const cur=ctrlNavGridEl.children[ctrlIdx];
+  if(cur && cur.scrollIntoView) cur.scrollIntoView({block:'nearest'});
+}
+
+function ctrlStartTest(){
+  let pool=CONTROL_QUESTIONS.filter(function(x){ return ctrlPart==='all' || String(x.p)===ctrlPart; });
+  pool=pool.slice();
+  if(ctrlShuffleEl.checked) ctrlShuffleArr(pool);
+  ctrlTest=pool;
+  ctrlState=new Array(pool.length).fill(null);
+  ctrlIdx=0;
+  ctrlIntroEl.classList.add('hidden');
+  ctrlEndEl.classList.add('hidden');
+  ctrlQuizEl.classList.remove('hidden');
+  ctrlBuildNav();
+  ctrlShowQuestion(0);
+}
+
+function ctrlRenderOptions(q){
+  ctrlOptionsEl.innerHTML='';
+  q.o.forEach(function(o){
+    const d=document.createElement('div');
+    d.className='opt';
+    const mk=document.createElement('div'); mk.className='marker';
+    const tx=document.createElement('div'); tx.className='otext'; tx.textContent=o.t;
+    d.appendChild(mk); d.appendChild(tx);
+    d.dataset.letter=o.l;
+    d.addEventListener('click',function(){
+      if(ctrlAnswered) return;
+      Array.prototype.forEach.call(ctrlOptionsEl.children,function(c){ c.classList.remove('selected'); });
+      d.classList.add('selected');
+    });
+    ctrlOptionsEl.appendChild(d);
+  });
+}
+
+function ctrlResultHtml(ok, correctText){
+  return ok
+    ? '<div class="lbl">Правильно</div><div>Ответ: <b>'+ctrlEsc(correctText)+'</b></div>'
+    : '<div class="lbl">Неверно</div><div>Правильный ответ: <b>'+ctrlEsc(correctText)+'</b></div>';
+}
+
+function ctrlRestoreAnswer(q, st){
+  if(q.t==='mc'){
+    Array.prototype.forEach.call(ctrlOptionsEl.children,function(c){
+      const l=c.dataset.letter;
+      c.classList.add('locked');
+      if(l===st.letter) c.classList.add('selected');
+      if(l===q.a) c.classList.add('correct');
+      else if(l===st.letter && !st.ok) c.classList.add('wrong');
+    });
+  }else{
+    ctrlAnswerEl.value=st.text;
+    ctrlAnswerEl.disabled=true;
+    ctrlAnswerEl.classList.add(st.ok?'correct':'wrong');
+  }
+  ctrlResultEl.className='result show '+(st.ok?'ok':'bad');
+  ctrlResultEl.innerHTML=ctrlResultHtml(st.ok, ctrlShowCorrect(q));
+  ctrlCheckBtn.classList.add('hidden');
+  ctrlCheckBtn.disabled=true;
+  ctrlNextBtn.classList.remove('hidden');
+  ctrlNextBtn.textContent=(ctrlIdx===ctrlTest.length-1) ? 'Завершить' : 'Следующий вопрос';
+}
+
+function ctrlShowQuestion(i){
+  ctrlIdx=i;
+  const q=ctrlTest[i];
+  const st=ctrlState[i];
+  ctrlAnswered=!!st;
+  ctrlProgressEl.textContent='Вопрос '+(i+1)+' / '+ctrlTest.length;
+  const m=ctrlMeta(q);
+  ctrlBadgeEl.textContent=m.title;
+  ctrlBadgeEl.className='badge '+m.cls;
+  ctrlBarEl.style.width=(i/ctrlTest.length*100)+'%';
+  ctrlScoreEl.textContent='Правильно: '+ctrlCorrectCount()+' / '+ctrlTest.length;
+  ctrlQtextEl.textContent=q.q;
+  ctrlResultEl.className='result';
+  ctrlResultEl.innerHTML='';
+  ctrlOptionsEl.innerHTML='';
+  ctrlAnswerEl.value='';
+  ctrlAnswerEl.className='answer-input';
+  ctrlAnswerEl.disabled=false;
+  if(q.t==='mc'){
+    ctrlAnswerWrapEl.classList.add('hidden');
+    ctrlRenderOptions(q);
+  }else{
+    ctrlAnswerWrapEl.classList.remove('hidden');
+    ctrlOptionsEl.innerHTML='';
+    ctrlAnswerEl.focus();
+  }
+  if(st){
+    ctrlRestoreAnswer(q, st);
+  }else{
+    ctrlCheckBtn.classList.remove('hidden');
+    ctrlCheckBtn.disabled=false;
+    ctrlNextBtn.classList.add('hidden');
+    ctrlNextBtn.textContent=(i===ctrlTest.length-1) ? 'Завершить' : 'Следующий вопрос';
+  }
+  ctrlUpdateNav();
+}
+
+function ctrlShowCorrect(q){
+  if(q.t==='mc'){
+    const o=q.o.filter(function(x){ return x.l===q.a; })[0];
+    return o ? o.t : '';
+  }
+  return q.a;
+}
+
+function ctrlCheckAnswer(){
+  if(ctrlAnswered) return;
+  const q=ctrlTest[ctrlIdx];
+  let ok=false, letter=null, text='';
+  if(q.t==='mc'){
+    const sel=ctrlOptionsEl.querySelector('.opt.selected');
+    if(!sel){
+      ctrlResultEl.className='result show';
+      ctrlResultEl.innerHTML='Выберите один из вариантов ответа.';
+      return;
+    }
+    letter=sel.dataset.letter;
+    ok=(letter===q.a);
+    const found=q.o.filter(function(x){ return x.l===letter; })[0];
+    text=found ? found.t : '';
+    Array.prototype.forEach.call(ctrlOptionsEl.children,function(c){
+      c.classList.add('locked');
+      if(c.dataset.letter===q.a) c.classList.add('correct');
+      else if(c.classList.contains('selected')) c.classList.add('wrong');
+    });
+  }else{
+    const val=ctrlAnswerEl.value.trim();
+    if(!val){ ctrlAnswerEl.focus(); return; }
+    ok=ctrlAnswers(q.a).indexOf(ctrlNorm(val))>=0;
+    text=val;
+    ctrlAnswerEl.disabled=true;
+    ctrlAnswerEl.classList.add(ok?'correct':'wrong');
+  }
+  ctrlAnswered=true;
+  ctrlState[ctrlIdx]={ok:ok, letter:letter, text:text};
+  ctrlResultEl.className='result show '+(ok?'ok':'bad');
+  ctrlResultEl.innerHTML=ctrlResultHtml(ok, ctrlShowCorrect(q));
+  ctrlScoreEl.textContent='Правильно: '+ctrlCorrectCount()+' / '+ctrlTest.length;
+  ctrlCheckBtn.disabled=true;
+  ctrlCheckBtn.classList.add('hidden');
+  ctrlNextBtn.classList.remove('hidden');
+  ctrlNextBtn.textContent=(ctrlIdx===ctrlTest.length-1) ? 'Завершить' : 'Следующий вопрос';
+  ctrlUpdateNav();
+}
+
+function ctrlNext(){
+  if(!ctrlAnswered) return;
+  if(ctrlIdx+1>=ctrlTest.length){ ctrlFinish(); return; }
+  ctrlShowQuestion(ctrlIdx+1);
+}
+
+function ctrlFinish(){
+  ctrlQuizEl.classList.add('hidden');
+  ctrlEndEl.classList.remove('hidden');
+  const total=ctrlTest.length;
+  const answered=ctrlAnsweredCount();
+  const correct=ctrlCorrectCount();
+  const pct=total ? Math.round(correct/total*100) : 0;
+  ctrlFinalScoreEl.textContent=pct+'%';
+  ctrlFinalScoreEl.className='score-big '+(pct>=80?'good':pct>=60?'mid':'low');
+  let sub='Правильных ответов: <b>'+correct+'</b> из <b>'+total+'</b>';
+  if(answered<total) sub+='<br>Без ответа: <b>'+(total-answered)+'</b>';
+  sub+='<br>'+(pct>=80?'Отличная подготовка!':pct>=60?'Неплохо, но есть над чем поработать.':'Стоит повторить материал.');
+  ctrlFinalSubEl.innerHTML=sub;
+
+  const wrong=[];
+  ctrlTest.forEach(function(q,i){ if(ctrlState[i] && !ctrlState[i].ok) wrong.push({q:q, st:ctrlState[i]}); });
+
+  if(wrong.length===0){
+    ctrlReviewEl.innerHTML='<div style="text-align:center; padding:14px; background:#f0f7f2; border:1px solid var(--green); border-radius:8px; color:var(--green); font-weight:700;">'+
+      (answered===total ? 'Отличный результат. Ошибок нет.' : 'Ошибок нет.')+'</div>';
+  }else{
+    let html='<div style="border-top:1px solid var(--border); padding-top:14px; margin-top:6px;">';
+    html+='<h3 style="color:var(--red); margin-bottom:12px; font-size:16px;">Разбор ошибок ('+wrong.length+')</h3>';
+    wrong.forEach(function(w){
+      const m=ctrlMeta(w.q);
+      html+='<div style="border:1px solid var(--border); border-radius:8px; padding:12px 14px; margin-bottom:12px; background:var(--panel2);">';
+      html+='<div style="margin-bottom:6px;"><span class="badge '+m.cls+'" style="margin-right:6px;">'+ctrlEsc(m.title)+'</span></div>';
+      html+='<div class="qtext" style="font-size:14px; margin-bottom:8px;">'+ctrlEsc(w.q.q)+'</div>';
+      html+='<div style="font-size:14px; line-height:1.5;">';
+      html+='<span style="color:var(--red); font-weight:700;">Ваш ответ:</span> <span>'+ctrlEsc(w.st.text||'—')+'</span><br>';
+      html+='<span style="color:var(--green); font-weight:700;">Правильный:</span> <span style="color:var(--green);">'+ctrlEsc(ctrlShowCorrect(w.q))+'</span>';
+      html+='</div></div>';
+    });
+    html+='</div>';
+    ctrlReviewEl.innerHTML=html;
+  }
+}
+
+Array.prototype.forEach.call(ctrlPartsEl.children,function(b){
+  b.addEventListener('click',function(){ ctrlSelectPart(b); });
+});
+ctrlStartBtn.addEventListener('click',ctrlStartTest);
+ctrlCheckBtn.addEventListener('click',ctrlCheckAnswer);
+ctrlNextBtn.addEventListener('click',ctrlNext);
+ctrlRestartBtn.addEventListener('click',ctrlStartTest);
+ctrlFinishBtn.addEventListener('click',function(){
+  const total=ctrlTest.length;
+  const unanswered=total-ctrlAnsweredCount();
+  if(unanswered>0 && !confirm('Без ответа: '+unanswered+' из '+total+'. Завершить тест?')) return;
+  ctrlFinish();
+});
+ctrlExitBtn.addEventListener('click',function(){
+  if(confirm('Выйти в главное меню? Текущий прогресс будет потерян.')){ showHome(); }
+});
+ctrlAnswerEl.addEventListener('keydown',function(e){
+  if(e.key==='Enter'){
+    e.preventDefault();
+    if(!ctrlAnswered) ctrlCheckAnswer(); else ctrlNext();
+  }
+});
+ctrlQuizEl.addEventListener('keydown',function(e){
+  if(e.key==='Enter' && ctrlAnswered){ e.preventDefault(); ctrlNext(); }
+});
+
+(function(){
+  const first=ctrlPartsEl.querySelector('button[data-part="1"]');
+  if(first) first.classList.add('selected');
+  ctrlUpdatePartName();
+})();
+
+</script>
+</body>
+</html>
