@@ -273,6 +273,10 @@
           <input type="checkbox" id="ctrlShuffle">
           <span>Перемешивать вопросы</span>
         </label>
+        <label class="ctrl-check">
+          <input type="checkbox" id="ctrlShuffleOpts">
+          <span>Перемешивать варианты ответов</span>
+        </label>
         <button class="btn-primary" id="ctrlStart">Начать</button>
       </div>
     </div>
@@ -1032,6 +1036,7 @@ const ctrlFinalSubEl = document.getElementById('ctrlFinalSub');
 const ctrlReviewEl = document.getElementById('ctrlReview');
 const ctrlRestartBtn = document.getElementById('ctrlRestart');
 const ctrlShuffleEl = document.getElementById('ctrlShuffle');
+const ctrlShuffleOptsEl = document.getElementById('ctrlShuffleOpts');
 const ctrlNavGridEl = document.getElementById('ctrlNavGrid');
 const ctrlFinishBtn = document.getElementById('ctrlFinish');
 
@@ -1062,6 +1067,27 @@ function ctrlShuffleArr(a){
     const t=a[i]; a[i]=a[j]; a[j]=t;
   }
   return a;
+}
+
+/* перемешивает варианты ответов и переназначает буквы: правильный остаётся правильным */
+function ctrlPrepQuestions(pool){
+  if(!ctrlShuffleOptsEl || !ctrlShuffleOptsEl.checked) return pool;
+  const letters='абвгдеёжз';
+  return pool.map(function(q){
+    if(q.t!=='mc' || !q.o || q.o.length<2) return q;
+    const order=q.o.map(function(o,i){ return i; });
+    ctrlShuffleArr(order);
+    const correctPos=q.o.map(function(o){ return o.l; }).indexOf(q.a);
+    const newO=order.map(function(oldIdx,newPos){ return {l:letters[newPos], t:q.o[oldIdx].t}; });
+    const newCorrectPos=order.indexOf(correctPos);
+    return {
+      p:q.p,
+      t:q.t,
+      q:q.q,
+      a:newCorrectPos>=0 ? letters[newCorrectPos] : q.a,
+      o:newO
+    };
+  });
 }
 
 function ctrlEsc(s){
@@ -1133,7 +1159,7 @@ function ctrlStartTest(){
   let pool=CONTROL_QUESTIONS.filter(function(x){ return ctrlPart==='all' || String(x.p)===ctrlPart; });
   pool=pool.slice();
   if(ctrlShuffleEl.checked) ctrlShuffleArr(pool);
-  ctrlTest=pool;
+  ctrlTest=ctrlPrepQuestions(pool);
   ctrlState=new Array(pool.length).fill(null);
   ctrlIdx=0;
   ctrlIntroEl.classList.add('hidden');
@@ -1519,7 +1545,7 @@ ctrlMarkOkBtn.addEventListener('click',function(){
 
 function ctrlStartList(list){
   if(!list || !list.length) return;
-  ctrlTest=list.slice();
+  ctrlTest=ctrlPrepQuestions(list.slice());
   ctrlState=new Array(ctrlTest.length).fill(null);
   ctrlIdx=0;
   ctrlIntroEl.classList.add('hidden');
