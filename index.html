@@ -840,7 +840,7 @@ const qTheme = document.getElementById('qTheme');
 const qbar = document.getElementById('qbar');
 const scoreLine = document.getElementById('scoreLine');
 
-let selectedCount = 10;
+let selectedCount = 'all';
 let activeThemes = ['laser','ufi','light','heat'];
 let shuffleOpts = false;
 let test = [];        // selected questions
@@ -871,7 +871,7 @@ document.querySelectorAll('#countBtns button').forEach(b=>{
     selectedCount = b.dataset.count;
   });
 });
-document.querySelector('.counts button[data-count="10"]').classList.add('selected');
+document.querySelector('.counts button[data-count="all"]').classList.add('selected');
 document.querySelectorAll('.themes .theme').forEach(c=>{
   c.addEventListener('change',()=>{
     const sel = document.querySelectorAll('.themes .theme:checked');
